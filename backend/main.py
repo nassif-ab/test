@@ -16,11 +16,12 @@ origins = [
     "http://localhost:5173",    # عنوان Vite
     "http://127.0.0.1:5173",    # عنوان Vite البديل
     "http://localhost:8000",    # عنوان آخر محتمل
+    "*",                       # Permitir todas las solicitudes (solo para desarrollo)
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],        # Permitir todas las solicitudes (solo para desarrollo)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

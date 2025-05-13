@@ -115,13 +115,47 @@ def get_post_stats(db: Session = Depends(get_db), current_user = Depends(get_opt
         }
         most_visited_posts.append(post_dict)
     
+    # Visitas por tiempo (últimos 7 días)
+    from datetime import datetime, timedelta
+    
+    # Obtener la fecha actual y calcular la fecha de hace 7 días
+    current_date = datetime.now()
+    seven_days_ago = current_date - timedelta(days=7)
+    
+    # Crear un diccionario para almacenar las visitas por día
+    visits_by_day = {}
+    for i in range(7):
+        date_key = (current_date - timedelta(days=i)).strftime('%Y-%m-%d')
+        visits_by_day[date_key] = 0
+    
+    # Obtener todas las visitas de los últimos 7 días
+    recent_visits = db.query(models.Visit).filter(
+        models.Visit.visit_date >= seven_days_ago
+    ).all()
+    
+    # Contar las visitas por día
+    for visit in recent_visits:
+        visit_date = visit.visit_date.strftime('%Y-%m-%d')
+        if visit_date in visits_by_day:
+            visits_by_day[visit_date] += 1
+    
+    # Convertir el diccionario a una lista para el resultado
+    visits_by_time = [
+        {"date": date, "count": count}
+        for date, count in visits_by_day.items()
+    ]
+    
+    # Ordenar por fecha
+    visits_by_time.sort(key=lambda x: x["date"])
+    
     return {
         "total_posts": total_posts,
         "total_likes": total_likes,
         "total_visits": total_visits,
         "popular_categories": popular_categories,
         "most_liked_posts": most_liked_posts,
-        "most_visited_posts": most_visited_posts
+        "most_visited_posts": most_visited_posts,
+        "visits_by_time": visits_by_time
     }
 
 @router.get("/{post_id}", response_model=schemas.PostOut)
