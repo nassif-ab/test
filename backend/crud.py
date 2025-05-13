@@ -99,10 +99,24 @@ def get_user_posts(db: Session, user_id: int):
 
 # ====== LIKES ======
 def add_like(db: Session, user_id: int, post_id: int):
+    # Crear nuevo like
     like = models.Like(user_id=user_id, post_id=post_id)
     db.add(like)
     db.commit()
     db.refresh(like)
+    
+    # Actualizar recomendaciones para este usuario
+    try:
+        from RecommendationSystem import recommendation_system
+        # Invalidar el caché para este usuario
+        if user_id in recommendation_system.user_based_recommendations_cache:
+            del recommendation_system.user_based_recommendations_cache[user_id]
+        # Actualizar la fecha de última actualización del caché
+        import datetime
+        recommendation_system.last_cache_update = datetime.datetime.now()
+    except Exception as e:
+        print(f"Error al actualizar recomendaciones después de like: {e}")
+    
     return like
 
 # ====== VISITS ======
@@ -117,6 +131,29 @@ def record_visit(db: Session, post_id: int, user_id: int = None, ip_address: str
     db.add(visit)
     db.commit()
     db.refresh(visit)
+    
+    # Actualizar recomendaciones para este usuario si está autenticado
+    if user_id:
+        try:
+            from RecommendationSystem import recommendation_system
+            # Invalidar el caché para este usuario
+            if user_id in recommendation_system.user_based_recommendations_cache:
+                del recommendation_system.user_based_recommendations_cache[user_id]
+            # Actualizar la fecha de última actualización del caché
+            import datetime
+            recommendation_system.last_cache_update = datetime.datetime.now()
+        except Exception as e:
+            print(f"Error al actualizar recomendaciones después de visita: {e}")
+    
+    # Actualizar recomendaciones similares para este post
+    try:
+        from RecommendationSystem import recommendation_system
+        # Invalidar el caché para este post
+        if post_id in recommendation_system.similar_posts_cache:
+            del recommendation_system.similar_posts_cache[post_id]
+    except Exception as e:
+        print(f"Error al actualizar posts similares después de visita: {e}")
+    
     return visit
 
 def get_post_visits_count(db: Session, post_id: int):

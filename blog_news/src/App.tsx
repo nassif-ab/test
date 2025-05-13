@@ -80,6 +80,7 @@ function App() {
   }, [token]);
 
   useEffect(() => {
+    if (token) {
     const fetchRecommendations = async () => {
       console.log("Estado de autenticación:", isAuthenticated);
       console.log("Usuario:", user);
@@ -99,6 +100,7 @@ function App() {
     };
     
     fetchRecommendations();
+    }
   }, [isAuthenticated, user, token]);
 
   return (

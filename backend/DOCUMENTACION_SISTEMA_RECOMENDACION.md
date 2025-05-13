@@ -84,9 +84,19 @@ self.cache_expiry = datetime.timedelta(hours=12)
 
 ## Cómo Activar las Recomendaciones
 
-### 1. Entrenamiento del Sistema
+### 1. Actualización Automática de Recomendaciones
 
-Para entrenar el sistema y actualizar las recomendaciones, ejecuta:
+El sistema ha sido modificado para actualizar las recomendaciones automáticamente con cada nueva interacción del usuario:
+
+- Cuando un usuario da "me gusta" a una publicación, sus recomendaciones se actualizan inmediatamente
+- Cuando un usuario visita una publicación, sus recomendaciones se actualizan inmediatamente
+- Al visitar una publicación, también se actualiza la lista de publicaciones similares para esa publicación
+
+Esto significa que las recomendaciones mejoran continuamente con cada interacción, sin necesidad de entrenamiento manual.
+
+### 2. Entrenamiento Manual (Opcional)
+
+También puedes ejecutar el entrenamiento manual para actualizar todas las recomendaciones de una vez:
 
 ```bash
 cd backend
@@ -95,9 +105,9 @@ python train_recommendation_system.py
 ```
 
 Este script:
-- Invalida el caché de recomendaciones
-- Analiza las interacciones existentes en la base de datos
-- Genera nuevas recomendaciones basadas en los datos actuales
+- Invalida el caché de todas las recomendaciones
+- Analiza todas las interacciones existentes en la base de datos
+- Genera nuevas recomendaciones para todos los usuarios y publicaciones
 
 ### 2. Uso en la Aplicación
 
