@@ -56,10 +56,15 @@ combined_score = svd_score + category_bonus
 
 ### 2. Recomendaciones de Posts Similares
 
-Para encontrar posts similares a uno específico, el sistema:
+Para encontrar posts similares a uno específico, el sistema ahora utiliza un enfoque de múltiples niveles:
 
-1. Primero busca posts de la misma categoría
-2. Si no hay suficientes, utiliza similitud de coseno basada en categorías
+1. **Análisis de interacciones con SVD**: Analiza los likes y visitas para encontrar publicaciones con las que han interactuado los mismos usuarios que interactuaron con la publicación actual.
+
+2. **Análisis avanzado de características**: Utiliza una combinación de categorías, longitud del título y longitud del contenido para calcular la similitud entre publicaciones mediante similitud del coseno (cosine similarity).
+
+3. **Categorías similares**: Si los métodos anteriores no tienen éxito, utiliza las categorías para encontrar publicaciones similares.
+
+4. **Publicaciones más recientes**: Como último recurso, sugiere las publicaciones más recientes.
 
 ```python
 # Filtrar posts por categoría si está disponible

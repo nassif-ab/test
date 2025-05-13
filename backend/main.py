@@ -12,6 +12,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",    # عنوان تطبيق React
     "http://localhost:3030",    # عنوان تطبيق React
+    "http://localhost:4040",    # عنوان تطبيق React
     "http://localhost:5173",    # عنوان Vite
     "http://127.0.0.1:5173",    # عنوان Vite البديل
     "http://localhost:8000",    # عنوان آخر محتمل

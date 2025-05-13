@@ -1,6 +1,7 @@
 # routers/posts.py (تحديث)
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional, Dict
 import schemas, crud, models  # Importar models
 from database import SessionLocal, get_db
@@ -50,6 +51,78 @@ def read_my_posts(
     current_user = Depends(get_current_user)  # إضافة التحقق من المستخدم
 ):
     return crud.get_posts(db, current_user.id)
+
+# Endpoint para obtener estadísticas generales de publicaciones
+@router.get("/stats", response_model=Dict)
+def get_post_stats(db: Session = Depends(get_db), current_user = Depends(get_optional_user)):
+    """Obtiene estadísticas generales de todas las publicaciones"""
+    
+    # Total de posts
+    total_posts = db.query(models.Post).count()
+    
+    # Total de likes
+    total_likes = db.query(models.Like).count()
+    
+    # Total de visitas
+    total_visits = db.query(models.Visit).count()
+    
+    # Categorías populares
+    categories = db.query(models.Post.categorie, func.count(models.Post.id).label('count'))\
+                .filter(models.Post.categorie != None)\
+                .group_by(models.Post.categorie)\
+                .order_by(func.count(models.Post.id).desc())\
+                .all()
+    
+    popular_categories = [{'category': cat, 'count': count} for cat, count in categories]
+    
+    # Posts más populares por likes
+    most_liked_posts_query = db.query(models.Post, func.count(models.Like.id).label('like_count'))\
+                            .join(models.Like, models.Like.post_id == models.Post.id, isouter=True)\
+                            .group_by(models.Post.id)\
+                            .order_by(func.count(models.Like.id).desc())\
+                            .limit(5)
+    
+    most_liked_posts = []
+    for post, like_count in most_liked_posts_query:
+        post_dict = {
+            "id": str(post.id),
+            "title": post.title,
+            "content": post.content,
+            "categorie": post.categorie,
+            "image": post.image,
+            "likes": like_count,
+            "visits": db.query(models.Visit).filter(models.Visit.post_id == post.id).count()
+        }
+        most_liked_posts.append(post_dict)
+    
+    # Posts más visitados
+    most_visited_posts_query = db.query(models.Post, func.count(models.Visit.id).label('visit_count'))\
+                            .join(models.Visit, models.Visit.post_id == models.Post.id, isouter=True)\
+                            .group_by(models.Post.id)\
+                            .order_by(func.count(models.Visit.id).desc())\
+                            .limit(5)
+    
+    most_visited_posts = []
+    for post, visit_count in most_visited_posts_query:
+        post_dict = {
+            "id": str(post.id),
+            "title": post.title,
+            "content": post.content,
+            "categorie": post.categorie,
+            "image": post.image,
+            "likes": db.query(models.Like).filter(models.Like.post_id == post.id).count(),
+            "visits": visit_count
+        }
+        most_visited_posts.append(post_dict)
+    
+    return {
+        "total_posts": total_posts,
+        "total_likes": total_likes,
+        "total_visits": total_visits,
+        "popular_categories": popular_categories,
+        "most_liked_posts": most_liked_posts,
+        "most_visited_posts": most_visited_posts
+    }
 
 @router.get("/{post_id}", response_model=schemas.PostOut)
 def read_post(

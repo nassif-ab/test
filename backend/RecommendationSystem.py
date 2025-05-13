@@ -230,7 +230,8 @@ class RecommendationSystem:
     
     def get_similar_posts(self, post_id: int, n_recommendations: int = 5) -> List[Dict]:
         """
-        Obtiene posts similares a un post dado
+        Obtiene posts similares a un post dado utilizando un enfoque híbrido
+        que combina SVD, similitud de contenido y categorías
         
         Args:
             post_id (int): ID del post
@@ -244,63 +245,156 @@ class RecommendationSystem:
             return self.similar_posts_cache[post_id][:n_recommendations]
         
         try:
-            # Obtener el post
-            post = self.db.query(Post).filter(Post.id == post_id).first()
-            if not post:
+            # Obtener el post objetivo
+            target_post = self.db.query(Post).filter(Post.id == post_id).first()
+            if not target_post:
                 return []
             
-            # Obtener todos los posts
-            all_posts = self.db.query(Post).all()
+            # Obtener todos los posts excepto el actual
+            all_posts = self.db.query(Post).filter(Post.id != post_id).all()
+            if not all_posts:
+                return []
             
-            # Filtrar posts por categoría si está disponible
-            if post.categorie:
-                category_posts = [p for p in all_posts if p.categorie == post.categorie and p.id != post_id]
-                if len(category_posts) >= n_recommendations:
-                    # Si hay suficientes posts en la misma categoría, usarlos
+            # Enfoque 1: Construir matriz de interacciones para SVD
+            # Obtener todas las interacciones (likes y visitas) para todos los posts
+            likes_data = self.db.query(Like.post_id, Like.user_id).all()
+            visits_data = self.db.query(Visit.post_id, Visit.user_id).filter(Visit.user_id != None).all()
+            
+            # Crear un DataFrame de interacciones
+            likes_df = pd.DataFrame(likes_data, columns=['post_id', 'user_id'])
+            likes_df['interaction'] = 2  # Mayor peso para likes
+            
+            visits_df = pd.DataFrame(visits_data, columns=['post_id', 'user_id'])
+            visits_df['interaction'] = 1  # Menor peso para visitas
+            
+            # Combinar interacciones
+            interactions_df = pd.concat([likes_df, visits_df])
+            
+            # Si hay suficientes interacciones, usar SVD
+            if len(interactions_df) > 10:  # Umbral arbitrario para tener suficientes datos
+                try:
+                    # Crear matriz de interacciones (usuarios x posts)
+                    interaction_matrix = interactions_df.pivot_table(
+                        index='user_id', 
+                        columns='post_id', 
+                        values='interaction',
+                        aggfunc='sum',
+                        fill_value=0
+                    )
+                    
+                    # Aplicar SVD si la matriz es lo suficientemente grande
+                    if interaction_matrix.shape[0] > 1 and interaction_matrix.shape[1] > 1:
+                        # Obtener usuarios que han interactuado con el post objetivo
+                        target_post_users = interactions_df[interactions_df['post_id'] == post_id]['user_id'].unique()
+                        
+                        # Si hay usuarios que han interactuado con este post
+                        if len(target_post_users) > 0:
+                            # Encontrar posts con los que estos usuarios también han interactuado
+                            similar_posts_ids = interactions_df[
+                                (interactions_df['user_id'].isin(target_post_users)) & 
+                                (interactions_df['post_id'] != post_id)
+                            ]['post_id'].value_counts().index.tolist()
+                            
+                            # Limitar a los top n posts
+                            similar_posts_ids = similar_posts_ids[:n_recommendations]
+                            
+                            if len(similar_posts_ids) >= n_recommendations:
+                                # Obtener detalles de los posts
+                                similar_posts = []
+                                for similar_id in similar_posts_ids:
+                                    similar_post = self.db.query(Post).filter(Post.id == similar_id).first()
+                                    if similar_post:
+                                        similar_posts.append(self._post_to_dict(similar_post))
+                                
+                                # Guardar en caché
+                                self.similar_posts_cache[post_id] = similar_posts
+                                self.last_cache_update = datetime.datetime.now()
+                                
+                                return similar_posts[:n_recommendations]
+                except Exception as matrix_error:
+                    logger.warning(f"Error al aplicar SVD para posts similares: {matrix_error}")
+            
+            # Enfoque 2: Similitud basada en características y contenido
+            # Crear DataFrame con características de los posts
+            posts_features = []
+            for p in [target_post] + all_posts:
+                # Extraer características del post
+                features = {
+                    'id': p.id,
+                    'categorie': p.categorie or "unknown",
+                    # Añadir más características para mejorar la similitud
+                    'title_length': len(p.title) if p.title else 0,
+                    'content_length': len(p.content) if p.content else 0,
+                }
+                posts_features.append(features)
+            
+            # Convertir a DataFrame
+            posts_df = pd.DataFrame(posts_features)
+            
+            # One-hot encoding de categorías
+            if 'categorie' in posts_df.columns:
+                categories_dummies = pd.get_dummies(posts_df['categorie'])
+                # Combinar con otras características numéricas
+                numeric_features = posts_df[['title_length', 'content_length']]
+                # Normalizar características numéricas
+                from sklearn.preprocessing import MinMaxScaler
+                scaler = MinMaxScaler()
+                numeric_features_scaled = scaler.fit_transform(numeric_features)
+                numeric_features_df = pd.DataFrame(
+                    numeric_features_scaled, 
+                    columns=['title_length_scaled', 'content_length_scaled'],
+                    index=posts_df.index
+                )
+                
+                # Combinar todas las características
+                features_matrix = pd.concat([categories_dummies, numeric_features_df], axis=1)
+                
+                # Calcular similitud
+                post_idx = posts_df[posts_df['id'] == post_id].index[0]
+                post_vector = features_matrix.iloc[post_idx].values.reshape(1, -1)
+                
+                similarities = []
+                for i, p_id in enumerate(posts_df['id']):
+                    if p_id != post_id:
+                        other_vector = features_matrix.iloc[i].values.reshape(1, -1)
+                        sim = cosine_similarity(post_vector, other_vector)[0][0]
+                        similarities.append((p_id, sim))
+                
+                # Ordenar por similitud
+                similarities.sort(key=lambda x: x[1], reverse=True)
+                
+                # Obtener los top n posts
+                similar_post_ids = [s[0] for s in similarities[:n_recommendations]]
+                
+                # Obtener detalles de los posts
+                similar_posts = []
+                for similar_id in similar_post_ids:
+                    similar_post = self.db.query(Post).filter(Post.id == similar_id).first()
+                    if similar_post:
+                        similar_posts.append(self._post_to_dict(similar_post))
+                
+                # Guardar en caché
+                self.similar_posts_cache[post_id] = similar_posts
+                self.last_cache_update = datetime.datetime.now()
+                
+                return similar_posts
+            
+            # Enfoque 3: Fallback a posts de la misma categoría
+            if target_post.categorie:
+                category_posts = [p for p in all_posts if p.categorie == target_post.categorie]
+                if category_posts:
+                    # Tomar los primeros n posts de la misma categoría
                     similar_posts = category_posts[:n_recommendations]
                     result = [self._post_to_dict(p) for p in similar_posts]
                     self.similar_posts_cache[post_id] = result
                     return result
             
-            # Si no hay suficientes posts en la misma categoría, usar similitud de contenido
-            # Crear matriz de características (por ahora solo usamos categoría como característica)
-            posts_df = pd.DataFrame({
-                'id': [p.id for p in all_posts],
-                'categorie': [p.categorie or "unknown" for p in all_posts]
-            })
+            # Enfoque 4: Último recurso - posts más recientes
+            recent_posts = self.db.query(Post).filter(Post.id != post_id).order_by(Post.created_at.desc()).limit(n_recommendations).all()
+            result = [self._post_to_dict(p) for p in recent_posts]
+            self.similar_posts_cache[post_id] = result
+            return result
             
-            # One-hot encoding de categorías
-            categories_dummies = pd.get_dummies(posts_df['categorie'])
-            
-            # Calcular similitud
-            post_idx = posts_df[posts_df['id'] == post_id].index[0]
-            post_vector = categories_dummies.iloc[post_idx].values.reshape(1, -1)
-            
-            similarities = []
-            for i, p_id in enumerate(posts_df['id']):
-                if p_id != post_id:
-                    other_vector = categories_dummies.iloc[i].values.reshape(1, -1)
-                    sim = cosine_similarity(post_vector, other_vector)[0][0]
-                    similarities.append((p_id, sim))
-            
-            # Ordenar por similitud
-            similarities.sort(key=lambda x: x[1], reverse=True)
-            
-            # Obtener los top n posts
-            similar_post_ids = [s[0] for s in similarities[:n_recommendations]]
-            
-            # Obtener detalles de los posts
-            similar_posts = []
-            for similar_id in similar_post_ids:
-                similar_post = self.db.query(Post).filter(Post.id == similar_id).first()
-                if similar_post:
-                    similar_posts.append(self._post_to_dict(similar_post))
-            
-            # Guardar en caché
-            self.similar_posts_cache[post_id] = similar_posts
-            self.last_cache_update = datetime.datetime.now()
-            
-            return similar_posts
         except Exception as e:
             logger.error(f"Error al obtener posts similares para el post {post_id}: {e}")
             return []
