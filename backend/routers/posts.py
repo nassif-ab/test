@@ -1,18 +1,12 @@
 # routers/posts.py (تحديث)
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from typing import List, Optional, Dict
 import schemas, crud, models  # Importar models
-from database import SessionLocal
+from database import SessionLocal, get_db
 from routers.auth import get_current_user, SECRET_KEY, ALGORITHM  # استيراد دالة التحقق من المستخدم والمتغيرات اللازمة
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/", response_model=schemas.PostOut)
 def create_post(
@@ -156,3 +150,29 @@ def get_post_visits(
     
     # Devolver el número de visitas
     return crud.get_post_visits_count(db, post_id)
+
+import models
+from models import User
+from RecommendationSystem import recommendation_system
+from routers.auth import get_current_user
+
+# Endpoint para obtener recomendaciones para un usuario
+@router.get("/user/{user_id}/recommendations", response_model=List[schemas.PostBase])
+def get_recommendations_for_user(user_id: int, n_recommendations: int = 5, db: Session = Depends(get_db)):
+    """Obtiene recomendaciones de posts para un usuario específico"""
+    print(f"Obteniendo recomendaciones para el usuario {user_id}")
+    
+    # Obtener recomendaciones
+    recommendations = recommendation_system.get_recommendations_for_user(user_id, n_recommendations)
+    
+    print(f"Se encontraron {len(recommendations)} recomendaciones")
+    return recommendations
+
+# Endpoint para obtener posts similares a un post específico
+@router.get("/{post_id}/similar", response_model=List[schemas.PostBase])
+def get_similar_posts(post_id: int, n_recommendations: int = 5, db: Session = Depends(get_db)):
+    """Obtiene posts similares a un post específico"""
+    print(f"Obteniendo posts similares al post {post_id}")
+    similar_posts = recommendation_system.get_similar_posts(post_id, n_recommendations)
+    print(f"Se encontraron {len(similar_posts)} posts similares")
+    return similar_posts

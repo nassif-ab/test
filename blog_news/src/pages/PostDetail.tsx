@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../content/AuthProvider';
-import { getPostById, recordVisit, likePost } from '../services/api';
+import { getPostById, recordVisit, likePost, getSimilarPosts } from '../services/api';
 import { PostUI } from '../services/api';
 
 const PostDetail: React.FC = () => {
@@ -15,6 +15,7 @@ const PostDetail: React.FC = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const [visitCount, setVisitCount] = useState(0);
+const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
 
   // Cargar los datos del post
   useEffect(() => {
@@ -39,6 +40,8 @@ const PostDetail: React.FC = () => {
           setLiked(fetchedPost.isliked || false);
           setLikeCount(fetchedPost.likes || 0);
           setVisitCount(fetchedPost.visits || 0);
+          const similar = await getSimilarPosts(id);
+          setSimilarPosts(similar);
         } else {
           setError("Post no encontrado");
         }
@@ -52,6 +55,8 @@ const PostDetail: React.FC = () => {
 
     fetchPost();
   }, [id, token]);
+
+  
 
   // Registrar una visita cuando se carga la página
   useEffect(() => {
@@ -193,6 +198,41 @@ const PostDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+
+      <div className="mt-8">
+  <h2 className="text-2xl font-bold mb-4 text-[#063267]">Posts similares</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {similarPosts.map((post) => (
+      <div key={post.id} className="bg-white rounded-lg overflow-hidden shadow-md">
+        <img 
+          src={post.image} 
+          alt={post.titre} 
+          className="w-full h-32 object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://placehold.co/400x200/ff0808/ffffff';
+          }}
+        />
+        <div className="p-4">
+          {post.categorie && (
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
+              {post.categorie}
+            </span>
+          )}
+          <h3 className="font-bold text-lg mb-2 text-[#063267]">{post.titre}</h3>
+          <p className="text-gray-700 text-sm line-clamp-2">{post.contenu}</p>
+          <Link 
+            to={`/post/${post.id}`} 
+            className="mt-2 inline-block text-sm text-[#063267] hover:underline"
+          >
+            Leer más
+          </Link>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
     </div>
   );
 };

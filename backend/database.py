@@ -7,3 +7,11 @@ DATABASE_URL = "sqlite:///./test.db"  # أو PostgreSQL مثلاً: postgresql:/
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
+
+# Función para obtener una conexión a la base de datos
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

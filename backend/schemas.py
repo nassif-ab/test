@@ -19,13 +19,20 @@ class UserOut(UserBase):
 
 # ====== Post ======
 class PostBase(BaseModel):
+    id: int
     title: str
     content: Optional[str] = None
     image: Optional[str] = None
     categorie: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
 
-class PostCreate(PostBase):
-    pass
+class PostCreate(BaseModel):
+    title: str
+    content: Optional[str] = None
+    image: Optional[str] = None
+    categorie: Optional[str] = None
 
 class PostOut(PostBase):
     id: int

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import PostsList from "./components/PostsList";
+import PostCard from "./components/PostCard";
 import PostDetail from "./pages/PostDetail";
-import { getPosts, PostUI } from "./services/api";
+import { getPosts, PostUI, getUserRecommendations } from "./services/api";
 import { useAuth } from "./content/AuthProvider";
 
 // المنشورات الافتراضية التي ستظهر قبل تحميل المنشورات من الخادم
@@ -43,9 +44,11 @@ interface Post {
 }
 
 function App() {
-  const { token } = useAuth();
+  // استخدام سياق المصادقة
+  const { token, isAuthenticated, user } = useAuth();
   const [posts, setPosts] = useState<PostUI[]>([]);
   const [loading, setLoading] = useState(false);
+  const [recommendations, setRecommendations] = useState<PostUI[]>([]);
 
   // جلب المنشورات من الخادم عند تحميل الصفحة
   useEffect(() => {
@@ -76,6 +79,28 @@ function App() {
     fetchPosts();
   }, [token]);
 
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      console.log("Estado de autenticación:", isAuthenticated);
+      console.log("Usuario:", user);
+      
+      if (isAuthenticated && user?.id) {
+        try {
+          console.log("Obteniendo recomendaciones para el usuario ID:", user.id);
+          const userRecommendations = await getUserRecommendations(user.id, token);
+          console.log("Recomendaciones recibidas:", userRecommendations);
+          setRecommendations(userRecommendations);
+        } catch (error) {
+          console.error("Error al obtener recomendaciones:", error);
+        }
+      } else {
+        console.log("No se obtuvieron recomendaciones: usuario no autenticado o sin ID");
+      }
+    };
+    
+    fetchRecommendations();
+  }, [isAuthenticated, user, token]);
+
   return (
     <Router>
       <div className="bg-[#f8f9fb] min-h-screen flex flex-col">
@@ -86,7 +111,26 @@ function App() {
             <>
               {/* المنشورات */}
               <PostsList posts={posts} />
-
+              {isAuthenticated && recommendations.length > 0 && (
+  <div className="container mx-auto px-4 py-8">
+    <h2 className="text-2xl font-bold mb-6 text-center text-[#063267]">Recomendado para ti</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {recommendations.map((post, index) => (
+        <PostCard 
+          key={index}
+          id={post.id}
+          titre={post.titre}
+          image={post.image}
+          contenu={post.contenu}
+          isliked={post.isliked}
+          likes={post.likes}
+          visits={post.visits}
+          categorie={post.categorie}
+        />
+      ))}
+    </div>
+  </div>
+)}
               {/* HERO SHORTCUT CARDS */}
               <section className="mt-6 flex flex-wrap gap-6 justify-center px-4">
                 {[

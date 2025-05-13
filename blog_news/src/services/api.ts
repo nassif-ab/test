@@ -243,3 +243,70 @@ export const createPost = async (post: { title: string, content: string }, token
     throw new Error("فشل في إنشاء المنشور");
   }
 };
+
+// Función para obtener recomendaciones para un usuario
+export const getUserRecommendations = async (userId: string | number, token?: string): Promise<PostUI[]> => {
+  try {
+    console.log("getUserRecommendations llamada con userId:", userId, "y token:", token ? "token presente" : "sin token");
+    const numericId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+    
+    // Configurar headers con o sin token de autenticación
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log("Token añadido a los headers");
+    } else {
+      console.log("No hay token disponible para la solicitud");
+    }
+    
+    console.log(`Realizando solicitud GET a /posts/user/${numericId}/recommendations`);
+    const response = await axiosClient.get(`/posts/user/${numericId}/recommendations`, { headers });
+    console.log("Respuesta recibida:", response.data);
+    
+    if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+      console.log("No se recibieron recomendaciones o el formato es incorrecto");
+      return [];
+    }
+    
+    // Convertir la respuesta al formato PostUI
+    const recommendations = response.data.map((post: any) => ({
+      id: post.id,
+      titre: post.title,
+      image: post.image || "/post.jpg",
+      contenu: post.content,
+      isliked: false, // Por defecto no sabemos si le gustó
+      likes: 0,       // No tenemos esta información aquí
+      visits: 0,      // No tenemos esta información aquí
+      categorie: post.categorie
+    }));
+    
+    console.log(`Se procesaron ${recommendations.length} recomendaciones`);
+    return recommendations;
+  } catch (error: any) {
+    console.error('Error al obtener recomendaciones:', error);
+    return [];
+  }
+};
+
+// Función para obtener posts similares a un post específico
+export const getSimilarPosts = async (postId: string | number): Promise<PostUI[]> => {
+  try {
+    const numericId = typeof postId === 'string' ? parseInt(postId, 10) : postId;
+    const response = await axiosClient.get(`/posts/${numericId}/similar`);
+    
+    // Convertir la respuesta al formato PostUI
+    return response.data.map((post: any) => ({
+      id: post.id,
+      titre: post.title,
+      image: post.image || "/post.jpg",
+      contenu: post.content,
+      isliked: false, // Por defecto no sabemos si le gustó
+      likes: 0,       // No tenemos esta información aquí
+      visits: 0,      // No tenemos esta información aquí
+      categorie: post.categorie
+    }));
+  } catch (error: any) {
+    console.error('Error al obtener posts similares:', error);
+    return [];
+  }
+};
