@@ -32,7 +32,7 @@ const Posts: React.FC = () => {
       setLoading(false);
     } catch (err) {
       console.error('Error fetching posts:', err);
-      setError('حدث خطأ أثناء تحميل المنشورات');
+      setError('Une erreur s\'est produite lors du chargement des publications');
       setLoading(false);
     }
   };
@@ -40,13 +40,13 @@ const Posts: React.FC = () => {
   const handleDeletePost = async (postId: string) => {
     if (!token) return;
     
-    if (window.confirm('هل أنت متأكد من حذف هذا المنشور؟')) {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette publication?')) {
       try {
         await deletePost(postId, token);
         setPosts(posts.filter(post => post.id !== postId));
       } catch (err) {
         console.error('Error deleting post:', err);
-        setError('حدث خطأ أثناء حذف المنشور');
+        setError('Une erreur s\'est produite lors de la suppression de la publication');
       }
     }
   };
@@ -72,7 +72,7 @@ const Posts: React.FC = () => {
       await fetchPosts();
     } catch (err) {
       console.error('Error saving post:', err);
-      setError('حدث خطأ أثناء حفظ المنشور');
+      setError('Une erreur s\'est produite lors de l\'enregistrement de la publication');
       setLoading(false);
     }
   };
@@ -86,6 +86,9 @@ const Posts: React.FC = () => {
       image: post.image || ''
     });
     setShowForm(true);
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100); // تأخير بسيط للسماح بإظهار النموذج أولًا
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -104,7 +107,7 @@ const Posts: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">إدارة المنشورات</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Gestion des publications</h1>
         <button 
           onClick={() => {
             setEditingPost(null);
@@ -113,13 +116,13 @@ const Posts: React.FC = () => {
           }}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded"
         >
-          {showForm ? 'إلغاء' : 'إضافة منشور جديد'}
+          {showForm ? 'Annuler' : 'Ajouter une nouvelle publication'}
         </button>
       </div>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">خطأ!</strong>
+          <strong className="font-bold">Erreur!</strong>
           <span className="block sm:inline"> {error}</span>
         </div>
       )}
@@ -128,13 +131,13 @@ const Posts: React.FC = () => {
       {showForm && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            {editingPost ? 'تعديل المنشور' : 'إضافة منشور جديد'}
+            {editingPost ? 'Modifier la publication' : 'Ajouter une nouvelle publication'}
           </h2>
           
           <form onSubmit={handleCreatePost} className="space-y-4">
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                العنوان
+                Titre
               </label>
               <input
                 id="title"
@@ -149,7 +152,7 @@ const Posts: React.FC = () => {
             
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="categorie">
-                الفئة
+                Catégorie
               </label>
               <input
                 id="categorie"
@@ -163,7 +166,7 @@ const Posts: React.FC = () => {
             
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="image">
-                رابط الصورة
+                URL de l'image
               </label>
               <input
                 id="image"
@@ -177,7 +180,7 @@ const Posts: React.FC = () => {
             
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="content">
-                المحتوى
+                Contenu
               </label>
               <textarea
                 id="content"
@@ -195,7 +198,7 @@ const Posts: React.FC = () => {
                 type="submit"
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded"
               >
-                {editingPost ? 'تحديث المنشور' : 'إنشاء المنشور'}
+                {editingPost ? 'Mettre à jour la publication' : 'Créer la publication'}
               </button>
             </div>
           </form>
@@ -208,19 +211,19 @@ const Posts: React.FC = () => {
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                العنوان
+                Titre
               </th>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                الفئة
+                Catégorie
               </th>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                الإعجابات
+                J'aime
               </th>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                الزيارات
+                Visites
               </th>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                الإجراءات
+                Actions
               </th>
             </tr>
           </thead>
@@ -231,7 +234,7 @@ const Posts: React.FC = () => {
                   {post.title}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {post.categorie || 'بدون فئة'}
+                  {post.categorie || 'Sans catégorie'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {post.likes || 0}
@@ -239,18 +242,19 @@ const Posts: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {post.visits || 0}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2 space-x-reverse">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2 flex space-x-reverse gap-2">
                   <button 
-                    onClick={() => handleEditPost(post)}
-                    className="text-indigo-600 hover:text-indigo-900 ml-2"
+                    onClick={() =>{ handleEditPost(post)
+                      }}
+                    className="text-indigo-600 hover:text-indigo-900"
                   >
-                    تعديل
+                    Modifier
                   </button>
                   <button 
                     onClick={() => handleDeletePost(post.id)}
                     className="text-red-600 hover:text-red-900"
                   >
-                    حذف
+                    Supprimer
                   </button>
                 </td>
               </tr>
@@ -259,7 +263,7 @@ const Posts: React.FC = () => {
             {posts.length === 0 && !loading && (
               <tr>
                 <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                  لا توجد منشورات بعد
+                  Aucune publication disponible
                 </td>
               </tr>
             )}

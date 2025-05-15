@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, func, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -8,6 +8,7 @@ class User(Base):
     username = Column(String(100), nullable=False)
     email = Column(String(150), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
+    is_admin = Column(Boolean, default=False)  # False: usuario normal, True: administrador
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     posts = relationship("Post", back_populates="owner")

@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* body {
   font-family: Arial, Helvetica, sans-serif;
   direction: rtl;
   text-align: right;
-}
+} */
 
 :root {
   --background: 0 0% 100%;

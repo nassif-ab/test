@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 import { useAuth } from '../content/AuthProvider';
-import axios from 'axios';
+import axiosClient from '../services/axiosclient';
 
 // Registrar los componentes necesarios para Chart.js
 ChartJS.register(
@@ -78,14 +78,14 @@ const UserStatsChart: React.FC<UserStatsChartProps> = ({ userId }) => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:8000/api/users/${userId}/stats`, {
+        const response = await axiosClient.get(`/users/${userId}/stats`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setStats(response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching user stats:', err);
-        setError('حدث خطأ أثناء تحميل إحصائيات المستخدم');
+        setError('Une erreur s\'est produite lors du chargement des statistiques utilisateur');
         setLoading(false);
       }
     };
@@ -106,22 +106,22 @@ const UserStatsChart: React.FC<UserStatsChartProps> = ({ userId }) => {
   if (error) {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-        <strong className="font-bold">خطأ!</strong>
+        <strong className="font-bold">Erreur!</strong>
         <span className="block sm:inline"> {error}</span>
       </div>
     );
   }
 
   if (!stats) {
-    return <div>لا توجد إحصائيات متاحة لهذا المستخدم</div>;
+    return <div>Aucune statistique disponible pour cet utilisateur</div>;
   }
 
   // Datos para el gráfico de pastel de categorías favoritas
   const categoryPieData = {
-    labels: stats.favorite_categories.map(cat => cat.category || 'بدون فئة'),
+    labels: stats.favorite_categories.map(cat => cat.category || 'Sans catégorie'),
     datasets: [
       {
-        label: 'عدد التفاعلات',
+        label: 'Nombre d\'interactions',
         data: stats.favorite_categories.map(cat => cat.count),
         backgroundColor: backgroundColors,
         borderColor: borderColors,
@@ -132,10 +132,10 @@ const UserStatsChart: React.FC<UserStatsChartProps> = ({ userId }) => {
 
   // Datos para el gráfico de barras de actividad
   const activityBarData = {
-    labels: ['المنشورات', 'الإعجابات', 'الزيارات'],
+    labels: ['Publications', 'J\'aime', 'Visites'],
     datasets: [
       {
-        label: 'نشاط المستخدم',
+        label: 'Activité de l\'utilisateur',
         data: [stats.total_posts, stats.total_likes, stats.total_visits],
         backgroundColor: [
           'rgba(75, 192, 192, 0.6)',
@@ -160,7 +160,7 @@ const UserStatsChart: React.FC<UserStatsChartProps> = ({ userId }) => {
       },
       title: {
         display: true,
-        text: `إحصائيات المستخدم: ${stats.username}`,
+        text: `Statistiques de l'utilisateur: ${stats.username}`,
       },
     },
   };
@@ -170,7 +170,7 @@ const UserStatsChart: React.FC<UserStatsChartProps> = ({ userId }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Gráfico de pastel para categorías favoritas */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">الفئات المفضلة</h3>
+          <h3 className="text-lg font-semibold mb-4">Catégories préférées</h3>
           <div className="h-64">
             <Pie data={categoryPieData} />
           </div>
@@ -178,7 +178,7 @@ const UserStatsChart: React.FC<UserStatsChartProps> = ({ userId }) => {
 
         {/* Gráfico de barras para actividad */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">نشاط المستخدم</h3>
+          <h3 className="text-lg font-semibold mb-4">Activité de l'utilisateur</h3>
           <div className="h-64">
             <Bar options={options} data={activityBarData} />
           </div>
@@ -187,18 +187,18 @@ const UserStatsChart: React.FC<UserStatsChartProps> = ({ userId }) => {
 
       {/* Resumen de estadísticas */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-4">ملخص الإحصائيات</h3>
+        <h3 className="text-lg font-semibold mb-4">Résumé des statistiques</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-green-600">إجمالي المنشورات</p>
+            <p className="text-sm text-green-600">Total des publications</p>
             <p className="text-2xl font-bold">{stats.total_posts}</p>
           </div>
           <div className="bg-pink-50 p-4 rounded-lg">
-            <p className="text-sm text-pink-600">إجمالي الإعجابات</p>
+            <p className="text-sm text-pink-600">Total des j'aime</p>
             <p className="text-2xl font-bold">{stats.total_likes}</p>
           </div>
           <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-blue-600">إجمالي الزيارات</p>
+            <p className="text-sm text-blue-600">Total des visites</p>
             <p className="text-2xl font-bold">{stats.total_visits}</p>
           </div>
         </div>

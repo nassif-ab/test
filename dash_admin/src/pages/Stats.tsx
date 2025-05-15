@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../content/AuthProvider';
 import PostStatsChart from '../components/PostStatsChart';
 import UserStatsChart from '../components/UserStatsChart';
-import axios from 'axios';
+import axiosClient from '../services/axiosclient';
 
 interface User {
   id: string;
@@ -22,7 +22,7 @@ const Stats: React.FC = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8000/api/users', {
+        const response = await axiosClient.get('/users', {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setUsers(response.data);
@@ -35,7 +35,7 @@ const Stats: React.FC = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching users:', err);
-        setError('حدث خطأ أثناء تحميل بيانات المستخدمين');
+        setError('Une erreur s\'est produite lors du chargement des données utilisateurs');
         setLoading(false);
       }
     };
@@ -54,19 +54,19 @@ const Stats: React.FC = () => {
   if (error) {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-        <strong className="font-bold">خطأ!</strong>
+        <strong className="font-bold">Erreur!</strong>
         <span className="block sm:inline"> {error}</span>
       </div>
     );
   }
 
   if (users.length === 0) {
-    return <div>لا توجد بيانات متاحة</div>;
+    return <div>Aucune donnée disponible</div>;
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">إحصائيات المحتوى واهتمامات المستخدمين</h1>
+      <h1 className="text-2xl font-bold mb-6">Statistiques de contenu et intérêts des utilisateurs</h1>
       
       {/* Pestañas para cambiar entre estadísticas generales y de usuario */}
       <div className="flex mb-6 border-b">
@@ -74,13 +74,13 @@ const Stats: React.FC = () => {
           className={`px-4 py-2 ${activeTab === 'general' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
           onClick={() => setActiveTab('general')}
         >
-          إحصائيات عامة
+          Statistiques générales
         </button>
         <button
           className={`px-4 py-2 ${activeTab === 'user' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
           onClick={() => setActiveTab('user')}
         >
-          إحصائيات المستخدمين
+          Statistiques utilisateurs
         </button>
       </div>
       
@@ -92,7 +92,7 @@ const Stats: React.FC = () => {
         <div>
           <div className="mb-6">
             <label htmlFor="user-select" className="block text-sm font-medium text-gray-700 mb-2">
-              اختر المستخدم
+              Sélectionnez un utilisateur
             </label>
             <select
               id="user-select"

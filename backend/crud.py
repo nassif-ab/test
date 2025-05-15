@@ -8,7 +8,8 @@ def create_user(db: Session, user: schemas.UserCreate):
     new_user = models.User(
         username=user.username,
         email=user.email,
-        password=hashed_password  # كلمة المرور مشفرة الآن
+        password=hashed_password,  # كلمة المرور مشفرة الآن
+        is_admin=user.is_admin  # Asignar el valor de is_admin del esquema
     )
     db.add(new_user)
     db.commit()
@@ -183,5 +184,18 @@ def authenticate_user(db: Session, username: str, password: str):
     if not user:
         return False
     if not verify_password(password, user.password):
+        return False
+    return user
+def authenticate_admin(db: Session, username: str, password: str):
+    user = get_user_by_username(db, username)
+    if not user:
+        return False
+    if not verify_password(password, user.password):
+        return False
+    # Verificar que el usuario tenga el rol de administrador
+    # Imprimir información para depuración
+    print(f"Usuario: {user.username}, is_admin: {user.is_admin}, tipo: {type(user.is_admin)}")
+    # Comprobar si el usuario es administrador (is_admin=True)
+    if not user.is_admin:
         return False
     return user

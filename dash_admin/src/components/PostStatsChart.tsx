@@ -14,8 +14,8 @@ import {
 } from 'chart.js';
 import { Pie, Line, Bar } from 'react-chartjs-2';
 import { useAuth } from '../content/AuthProvider';
-import axios from 'axios';
 import 'chartjs-adapter-date-fns';
+import axiosClient from '../services/axiosclient';
 
 // Registrar los componentes necesarios para Chart.js
 ChartJS.register(
@@ -78,14 +78,14 @@ const PostStatsChart: React.FC = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8000/api/posts/stats', {
+        const response = await axiosClient.get('/posts/stats', {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setStats(response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching stats:', err);
-        setError('حدث خطأ أثناء تحميل الإحصائيات');
+        setError('Une erreur s\'est produite lors du chargement des statistiques');
         setLoading(false);
       }
     };
@@ -104,22 +104,22 @@ const PostStatsChart: React.FC = () => {
   if (error) {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-        <strong className="font-bold">خطأ!</strong>
+        <strong className="font-bold">Erreur!</strong>
         <span className="block sm:inline"> {error}</span>
       </div>
     );
   }
 
   if (!stats) {
-    return <div>لا توجد إحصائيات متاحة</div>;
+    return <div>Aucune statistique disponible</div>;
   }
 
   // Datos para el gráfico de pastel de categorías
   const categoryPieData = {
-    labels: stats.popular_categories.map(cat => cat.category || 'بدون فئة'),
+    labels: stats.popular_categories.map(cat => cat.category || 'Sans catégorie'),
     datasets: [
       {
-        label: 'عدد المنشورات',
+        label: 'Nombre de publications',
         data: stats.popular_categories.map(cat => cat.count),
         backgroundColor: backgroundColors,
         borderColor: borderColors,
@@ -133,14 +133,14 @@ const PostStatsChart: React.FC = () => {
     labels: stats.most_liked_posts.map(post => post.title.substring(0, 15) + '...'),
     datasets: [
       {
-        label: 'الإعجابات',
+        label: 'J\'aime',
         data: stats.most_liked_posts.map(post => post.likes),
         borderColor: 'rgba(255, 99, 132, 1)',
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         tension: 0.4,
       },
       {
-        label: 'الزيارات',
+        label: 'Visits',
         data: stats.most_liked_posts.map(post => post.visits),
         borderColor: 'rgba(54, 162, 235, 1)',
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -157,7 +157,7 @@ const PostStatsChart: React.FC = () => {
       },
       title: {
         display: true,
-        text: 'إحصائيات المنشورات',
+        text: 'Statistiques des publications',
       },
     },
   };
@@ -165,14 +165,14 @@ const PostStatsChart: React.FC = () => {
   // Preparar datos para el gráfico de visitas por tiempo
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ar-MA', { day: 'numeric', month: 'short' });
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
   const visitsTimeData = {
     labels: stats?.visits_by_time?.map(item => formatDate(item.date)) || [],
     datasets: [
       {
-        label: 'الزيارات',
+        label: 'Visits',
         data: stats?.visits_by_time?.map(item => item.count) || [],
         backgroundColor: 'rgba(54, 162, 235, 0.5)',
         borderColor: 'rgba(54, 162, 235, 1)',
@@ -191,7 +191,7 @@ const PostStatsChart: React.FC = () => {
       },
       title: {
         display: true,
-        text: 'الزيارات حسب الوقت (آخر 7 أيام)',
+        text: 'Visites par période (7 derniers jours)',
       },
     },
     scales: {
@@ -199,13 +199,13 @@ const PostStatsChart: React.FC = () => {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'عدد الزيارات'
+          text: 'Nombre de visites'
         }
       },
       x: {
         title: {
           display: true,
-          text: 'التاريخ'
+          text: 'Date'
         }
       }
     },
@@ -215,7 +215,7 @@ const PostStatsChart: React.FC = () => {
     <div className="space-y-8">
       {/* Gráfico de visitas por tiempo */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-4">الزيارات الكلية حسب الوقت</h3>
+        <h3 className="text-lg font-semibold mb-4">Visites totales par période</h3>
         <div className="h-64">
           <Line options={timeChartOptions} data={visitsTimeData} />
         </div>
@@ -224,7 +224,7 @@ const PostStatsChart: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Gráfico de pastel para categorías */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">توزيع الفئات</h3>
+          <h3 className="text-lg font-semibold mb-4">Distribution des catégories</h3>
           <div className="h-64">
             <Pie data={categoryPieData} />
           </div>
@@ -232,7 +232,7 @@ const PostStatsChart: React.FC = () => {
 
         {/* Gráfico de línea para likes y visitas */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">الإعجابات والزيارات للمنشورات الأكثر شعبية</h3>
+          <h3 className="text-lg font-semibold mb-4">J'aime et visites des publications les plus populaires</h3>
           <div className="h-64">
             <Line options={options} data={popularPostsLineData} />
           </div>
@@ -241,18 +241,18 @@ const PostStatsChart: React.FC = () => {
 
       {/* Resumen de estadísticas */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-4">ملخص الإحصائيات</h3>
+        <h3 className="text-lg font-semibold mb-4">Résumé des statistiques</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-indigo-50 p-4 rounded-lg">
-            <p className="text-sm text-indigo-600">إجمالي المنشورات</p>
+            <p className="text-sm text-indigo-600">Total des publications</p>
             <p className="text-2xl font-bold">{stats.total_posts}</p>
           </div>
           <div className="bg-pink-50 p-4 rounded-lg">
-            <p className="text-sm text-pink-600">إجمالي الإعجابات</p>
+            <p className="text-sm text-pink-600">Total des j'aime</p>
             <p className="text-2xl font-bold">{stats.total_likes}</p>
           </div>
           <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-blue-600">إجمالي الزيارات</p>
+            <p className="text-sm text-blue-600">Total des visites</p>
             <p className="text-2xl font-bold">{stats.total_visits}</p>
           </div>
         </div>

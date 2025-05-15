@@ -11,7 +11,8 @@ def main():
         user_data = UserCreate(
             username="admin",
             email="admin@example.com",
-            password="password123"
+            password="123456789",
+            is_admin=True
         )
         
         # Crear el usuario en la base de datos

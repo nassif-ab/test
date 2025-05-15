@@ -1,11 +1,12 @@
 import axiosClient from "./axiosclient";
 
-// واجهات البيانات
+// Interfaces de données
 export interface User {
   id: string;
   username: string;
   email?: string;
   created_at?: string;
+  is_admin?: boolean;
 }
 
 export interface Post {
@@ -36,11 +37,14 @@ export interface PostUI {
 interface AuthResponse {
   access_token: string;
   token_type: string;
-  user: User;
+  user_id: string;
+  username: string;
+  is_admin: boolean;
+  user?: User;
 }
 
 
-// تسجيل الدخول
+// Connexion
 export const loginUser = async (username: string, password: string): Promise<AuthResponse> => {
   try {
     console.log('Attempting to login with username:', username);
@@ -52,7 +56,7 @@ export const loginUser = async (username: string, password: string): Promise<Aut
     formData.append('password', password);
     
     console.log('Sending login request...');
-    const response = await axiosClient.post("/auth/token", formData, {
+    const response = await axiosClient.post("/auth/token_admin", formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -60,20 +64,22 @@ export const loginUser = async (username: string, password: string): Promise<Aut
     
     console.log('Login successful, token received');
     console.log('Token:', response.data.access_token);
-
-    // الحصول على معلومات المستخدم بعد تسجيل الدخول
-    console.log('Fetching user information...');
-    const userResponse = await axiosClient.get("/auth/me", {
-      headers: {
-        'Authorization': `Bearer ${response.data.access_token}`
-      }
+    console.log('User data from token:', {
+      user_id: response.data.user_id,
+      username: response.data.username,
+      is_admin: response.data.is_admin
     });
-    
-    console.log('User information received:', userResponse.data);
+
+    // Crear un objeto de usuario a partir de los datos recibidos
+    const user: User = {
+      id: response.data.user_id.toString(),
+      username: response.data.username,
+      is_admin: response.data.is_admin
+    };
 
     return {
       ...response.data,
-      user: userResponse.data
+      user
     };
   } catch (error: any) {
     console.error('Login error details:', error);
@@ -84,17 +90,17 @@ export const loginUser = async (username: string, password: string): Promise<Aut
       console.error('Error response data:', error.response.data);
       
       const status = error.response.status;
-      if (status === 404) throw new Error("المستخدم غير موجود");
-      if (status === 401) throw new Error("كلمة المرور غير صحيحة");
-      throw new Error(`خطأ من الخادم: ${error.response.data.detail || 'خطأ غير معروف'}`);
+      if (status === 404) throw new Error("Utilisateur introuvable");
+      if (status === 401) throw new Error("Mot de passe incorrect");
+      throw new Error(`Erreur du serveur: ${error.response.data.detail || 'Erreur inconnue'}`);
     } else if (error.request) {
       // تم إجراء الطلب ولكن لم يتم استلام استجابة
       console.error('No response received from server');
-      throw new Error("لم يتم استلام استجابة من الخادم. تأكد من تشغيل الخادم الخلفي.");
+      throw new Error("Aucune réponse reçue du serveur. Assurez-vous que le serveur backend est en cours d'exécution.");
     } else {
       // حدث خطأ أثناء إعداد الطلب
       console.error('Error setting up request:', error.message);
-      throw new Error(`خطأ في إعداد الطلب: ${error.message}`);
+      throw new Error(`Erreur lors de la configuration de la requête: ${error.message}`);
     }
   }
 };

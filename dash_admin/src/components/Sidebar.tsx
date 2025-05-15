@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   return (
     <div className="h-screen w-64 bg-indigo-900 text-white flex flex-col">
       <div className="p-5 border-b border-indigo-800">
-        <h1 className="text-2xl font-bold">لوحة الإدارة</h1>
+        <h1 className="text-2xl font-bold">Administration</h1>
       </div>
       
       <nav className="flex-1 overflow-y-auto py-4">
@@ -54,25 +54,25 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           <li>
             <Link to="/admin" className={`flex items-center p-3 rounded-md ${isActive('/admin')}`}>
               <DashboardIcon />
-              <span className="mr-3">الرئيسية</span>
+              <span className="ml-3">Accueil</span>
             </Link>
           </li>
           <li>
             <Link to="/admin/users" className={`flex items-center p-3 rounded-md ${isActive('/admin/users')}`}>
               <UsersIcon />
-              <span className="mr-3">المستخدمين</span>
+              <span className="ml-3">Utilisateurs</span>
             </Link>
           </li>
           <li>
             <Link to="/admin/posts" className={`flex items-center p-3 rounded-md ${isActive('/admin/posts')}`}>
               <PostsIcon />
-              <span className="mr-3">المنشورات</span>
+              <span className="ml-3">Publications</span>
             </Link>
           </li>
           <li>
             <Link to="/admin/stats" className={`flex items-center p-3 rounded-md ${isActive('/admin/stats')}`}>
               <StatsIcon />
-              <span className="mr-3">الإحصائيات</span>
+              <span className="ml-3">Statistiques</span>
             </Link>
           </li>
         </ul>
@@ -84,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           className="flex items-center p-3 w-full text-left rounded-md text-gray-300 hover:bg-indigo-700 hover:text-white"
         >
           <LogoutIcon />
-          <span className="mr-3">تسجيل الخروج</span>
+          <span className="ml-3">Déconnexion</span>
         </button>
       </div>
     </div>

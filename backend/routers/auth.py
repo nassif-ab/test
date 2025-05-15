@@ -67,7 +67,33 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user_id": user.id,
+        "username": user.username,
+        "is_admin": user.is_admin if hasattr(user, 'is_admin') else 0
+    }
+@router.post("/token_admin", response_model=schemas.Token)
+async def login_for_access_token_admin(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = crud.authenticate_admin(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Nom d'utilisateur ou mot de passe incorrect ou vous n'avez pas les droits d'administrateur",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user_id": user.id,
+        "username": user.username,
+        "is_admin": user.is_admin if hasattr(user, 'is_admin') else 0
+    }
 
 @router.post("/register", response_model=schemas.UserOut)
 async def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -81,4 +107,5 @@ async def register_user(user: schemas.UserCreate, db: Session = Depends(get_db))
 
 @router.get("/me", response_model=schemas.UserOut)
 async def read_users_me(current_user = Depends(get_current_user)):
+    # Devolver directamente el objeto de usuario
     return current_user

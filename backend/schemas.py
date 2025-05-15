@@ -6,6 +6,7 @@ from typing import Optional
 class UserBase(BaseModel):
     username: str
     email: EmailStr
+    is_admin: bool = False
 
 class UserCreate(UserBase):
     password: str
@@ -85,6 +86,9 @@ from typing import Optional
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user_id: Optional[int] = None
+    username: Optional[str] = None
+    is_admin: bool = False
 
 class TokenData(BaseModel):
     username: Optional[str] = None

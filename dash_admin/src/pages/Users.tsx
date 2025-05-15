@@ -22,7 +22,7 @@ const Users: React.FC = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching users:', err);
-        setError('حدث خطأ أثناء تحميل بيانات المستخدمين');
+        setError('Une erreur s\'est produite lors du chargement des données utilisateurs');
         setLoading(false);
       }
     };
@@ -41,7 +41,7 @@ const Users: React.FC = () => {
       setStatsLoading(false);
     } catch (err) {
       console.error('Error fetching user stats:', err);
-      setError('حدث خطأ أثناء تحميل إحصائيات المستخدم');
+      setError('Une erreur s\'est produite lors du chargement des statistiques utilisateur');
       setStatsLoading(false);
     }
   };
@@ -57,7 +57,7 @@ const Users: React.FC = () => {
   if (error) {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-        <strong className="font-bold">خطأ!</strong>
+        <strong className="font-bold">Erreur!</strong>
         <span className="block sm:inline"> {error}</span>
       </div>
     );
@@ -65,24 +65,24 @@ const Users: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">إدارة المستخدمين</h1>
+      <h1 className="text-3xl font-bold text-gray-800">Gestion des Utilisateurs</h1>
       
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Lista de usuarios */}
         <div className="lg:w-1/2 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">المستخدمين</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Utilisateurs</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    اسم المستخدم
+                    Nom d'utilisateur
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    البريد الإلكتروني
+                    Email
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجراءات
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -100,7 +100,7 @@ const Users: React.FC = () => {
                         onClick={() => handleUserSelect(user.id)}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
-                        عرض التفاصيل
+                        Voir détails
                       </button>
                     </td>
                   </tr>
@@ -112,11 +112,11 @@ const Users: React.FC = () => {
         
         {/* Detalles del usuario seleccionado */}
         <div className="lg:w-1/2 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">تفاصيل المستخدم</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Détails de l'utilisateur</h2>
           
           {!selectedUser ? (
             <div className="text-center py-10 text-gray-500">
-              اختر مستخدمًا لعرض التفاصيل
+              Sélectionnez un utilisateur pour voir les détails
             </div>
           ) : statsLoading ? (
             <div className="flex justify-center items-center py-10">
@@ -130,38 +130,38 @@ const Users: React.FC = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-indigo-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-indigo-700">المنشورات</h4>
+                  <h4 className="text-sm font-medium text-indigo-700">Publications</h4>
                   <p className="text-2xl font-bold text-indigo-900">{userStats.total_posts}</p>
                 </div>
                 <div className="bg-indigo-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-indigo-700">الإعجابات</h4>
+                  <h4 className="text-sm font-medium text-indigo-700">J'aime</h4>
                   <p className="text-2xl font-bold text-indigo-900">{userStats.total_likes}</p>
                 </div>
                 <div className="bg-indigo-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-indigo-700">الزيارات</h4>
+                  <h4 className="text-sm font-medium text-indigo-700">Visites</h4>
                   <p className="text-2xl font-bold text-indigo-900">{userStats.total_visits}</p>
                 </div>
               </div>
               
               <div>
-                <h4 className="text-lg font-medium mb-2">الفئات المفضلة</h4>
+                <h4 className="text-lg font-medium mb-2">Catégories favorites</h4>
                 {userStats.favorite_categories.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
                     {userStats.favorite_categories.map((category, index) => (
                       <div key={index} className="bg-gray-100 rounded p-2 flex justify-between">
-                        <span className="font-medium">{category.category || 'بدون فئة'}</span>
+                        <span className="font-medium">{category.category || 'Sans catégorie'}</span>
                         <span className="text-gray-600">{category.count}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">لا توجد فئات مفضلة بعد</p>
+                  <p className="text-gray-500">Aucune catégorie favorite</p>
                 )}
               </div>
             </div>
           ) : (
             <div className="text-center py-10 text-gray-500">
-              لا توجد بيانات متاحة لهذا المستخدم
+              Aucune donnée disponible pour cet utilisateur
             </div>
           )}
         </div>

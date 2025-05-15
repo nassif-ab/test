@@ -22,7 +22,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     
     if (!username || !password) {
-      setError('يرجى إدخال اسم المستخدم وكلمة المرور');
+      setError('Veuillez entrer un nom d\'utilisateur et un mot de passe');
       return;
     }
     
@@ -33,7 +33,7 @@ const Login: React.FC = () => {
       navigate('/admin');
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || 'فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.');
+      setError(err.message || 'Échec de la connexion. Veuillez vérifier vos identifiants.');
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-lg shadow-md">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            تسجيل الدخول للوحة الإدارة
+            Connexion au Panneau d'Administration
           </h2>
         </div>
         
@@ -57,27 +57,27 @@ const Login: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="username" className="sr-only">اسم المستخدم</label>
+              <label htmlFor="username" className="sr-only">Nom d'utilisateur</label>
               <input
                 id="username"
                 name="username"
                 type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="اسم المستخدم"
+                placeholder="Nom d'utilisateur"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">كلمة المرور</label>
+              <label htmlFor="password" className="sr-only">Mot de passe</label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="كلمة المرور"
+                placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -100,7 +100,7 @@ const Login: React.FC = () => {
                   </svg>
                 </span>
               ) : null}
-              تسجيل الدخول
+              Connexion
             </button>
           </div>
         </form>

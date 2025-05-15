@@ -6,6 +6,7 @@ interface User {
   id: string;
   username: string;
   email?: string;
+  is_admin?: boolean;
 }
 
 // تعريف نوع سياق المصادقة
@@ -17,6 +18,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 // Create context with the defined type
@@ -79,7 +81,18 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // تعيين التوكن والمستخدم
       setToken(authResponse.access_token);
-      setUser(authResponse.user);
+      // Asegurarse de que user no sea undefined
+      if (authResponse.user) {
+        setUser(authResponse.user);
+      } else {
+        // Crear un objeto de usuario a partir de los datos recibidos
+        const user: User = {
+          id: authResponse.user_id.toString(),
+          username: authResponse.username,
+          is_admin: authResponse.is_admin
+        };
+        setUser(user);
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -101,7 +114,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser,
       login,
       logout,
-      isAuthenticated: !!token && !!user
+      isAuthenticated: !!token && !!user,
+      isAdmin: !!user && user.is_admin === true
     }),
     [token, user]
   );

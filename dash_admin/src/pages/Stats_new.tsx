@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../content/AuthProvider';
 import PostStatsChart from '../components/PostStatsChart';
 import UserStatsChart from '../components/UserStatsChart';
-import axios from 'axios';
+import axiosClient from '../services/axiosclient';
 
 interface User {
   id: string;
@@ -22,7 +22,7 @@ const Stats: React.FC = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8000/api/users', {
+        const response = await axiosClient.get('/users', {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setUsers(response.data);
