@@ -113,7 +113,6 @@ def get_global_analytics_data(api_key: str = None, db: Session = Depends(get_db)
         post_data = {
             "id": post.id,
             "title": post.title,
-            "content": post.content[:100] + "..." if post.content and len(post.content) > 100 else post.content,
             "categorie": post.categorie,
             "user_id": post.user_id,
             "created_at": post.created_at,
