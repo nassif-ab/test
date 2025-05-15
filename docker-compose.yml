@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    networks:
+      - pfenet
+
+  blog_news:
+    build: ./blog_news
+    ports:
+      - "4173:4173"
+    networks:
+      - pfenet
+
+  dash_admin:
+    build: ./dash_admin
+    ports:
+      - "4174:4174"
+    networks:
+      - pfenet
+
+networks:
+  pfenet:
