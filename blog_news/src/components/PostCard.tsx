@@ -85,9 +85,7 @@ const PostCard: React.FC<PostCardProps> = ({ id, titre, image, contenu, isliked=
           </span>
         )}
         <h3 className="text-xl font-bold mb-2 text-[#063267]">{titre}</h3>
-        <p className="text-gray-700 text-base line-clamp-3">
-          {contenu}
-        </p>
+        <p className="text-gray-700 text-base line-clamp-3" dangerouslySetInnerHTML={{ __html: contenu.substring(0, 150) + '...' }} />
         <div className="mt-4 flex justify-between items-center">
           <Link to={`/post/${id}`} className="bg-[#063267] hover:bg-[#0a4a94] text-white py-2 px-4 rounded-md transition-colors duration-300 inline-block">
             Lire la suite

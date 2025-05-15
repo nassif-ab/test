@@ -22,7 +22,7 @@ def generate_article_json(client, topic, index, output_dir,catg):
               "titre": "{topic}",
               "image": "/post.jpg",
               "contenu": "[Ici, vous devriez mettre un article détaillé format markdown en Français sur :{topic}]",
-               "categorie": "[Choisissez une seule catégorie appropriée à partir de cette liste : {', '.join(catg)}]"
+              "categorie": "[Choisissez une seule catégorie appropriée à partir de cette liste : {', '.join(catg)}]"
             }}
 
             Make sure the JSON is valid and properly formatted. Do not include any markdown code blocks or explanations.

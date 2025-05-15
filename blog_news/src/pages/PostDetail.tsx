@@ -182,9 +182,7 @@ const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
           
           {/* Contenido completo */}
           <div className="prose max-w-none">
-            <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
-              {post.contenu}
-            </p>
+            <div className="text-gray-700 text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: post.contenu }} />
           </div>
           
           {/* Botón para volver */}
@@ -221,7 +219,7 @@ const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
             </span>
           )}
           <h3 className="font-bold text-lg mb-2 text-[#063267]">{post.titre}</h3>
-          <p className="text-gray-700 text-sm line-clamp-2">{post.contenu}</p>
+          <div className="text-gray-700 text-sm line-clamp-2" dangerouslySetInnerHTML={{ __html: post.contenu.substring(0, 150) + '...' }} />
           <Link 
             to={`/post/${post.id}`} 
             className="mt-2 inline-block text-sm text-[#063267] hover:underline"

@@ -27,12 +27,12 @@ def seed_articles(db: Session, articles):
     for article in articles:
         try:
             post_data = PostCreate(
-                titre=article["titre"],
+                title=article["titre"],  # Cambiar titre a title
                 image=article["image"],
-                contenu=markdown.markdown(article["contenu"]),
+                content=markdown.markdown(article["contenu"]),  # Cambiar contenu a content
                 categorie=article["categorie"]
             )
-            create_post(db, post_data)
+            create_post(db, post_data, user_id=1)  # Añadir user_id=1 o el ID de un usuario existente
             print(f"✅ Article ajouté : {article['titre']}")
         except Exception as e:
             print(f"❌ Erreur pour l'article '{article.get('titre', 'inconnu')}': {e}")
