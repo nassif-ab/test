@@ -25,6 +25,9 @@ class PostBase(BaseModel):
     content: Optional[str] = None
     image: Optional[str] = None
     categorie: Optional[str] = None
+    likes: int = 0  # Número total de likes
+    isliked: bool = False  # Si el usuario actual ha dado like
+    visits: int = 0  # Contador de visitas
     
     class Config:
         orm_mode = True

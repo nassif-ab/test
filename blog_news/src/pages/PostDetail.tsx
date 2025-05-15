@@ -3,11 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../content/AuthProvider';
 import { getPostById, recordVisit, likePost, getSimilarPosts } from '../services/api';
 import { PostUI } from '../services/api';
+import { useLoginModal } from '../content/LoginModalContext';
 
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { token, isAuthenticated } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const [post, setPost] = useState<PostUI | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +17,7 @@ const PostDetail: React.FC = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const [visitCount, setVisitCount] = useState(0);
-const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
+  const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
 
   // Cargar los datos del post
   useEffect(() => {
@@ -74,7 +76,13 @@ const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
   }, [id, loading, post, token]);
 
   const handleLike = async () => {
-    if (!isAuthenticated || !id || isLiking) {
+    if (!isAuthenticated) {
+      // Mostrar modal de inicio de sesión si el usuario no está autenticado
+      openLoginModal();
+      return;
+    }
+    
+    if (!id || isLiking) {
       return;
     }
 
@@ -163,8 +171,8 @@ const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
             {/* Botón de like */}
             <button 
               onClick={handleLike}
-              disabled={!isAuthenticated || isLiking}
-              className={`flex items-center gap-1 transition-colors ${liked ? 'text-red-500' : 'text-gray-500'} ${isAuthenticated ? 'hover:text-red-500' : ''}`}
+              disabled={isLiking}
+              className={`flex items-center gap-1 transition-colors ${liked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500`}
               title={isAuthenticated ? 'Me gusta' : 'Inicia sesión para dar like'}
             >
               <svg 
@@ -222,9 +230,9 @@ const [similarPosts, setSimilarPosts] = useState<PostUI[]>([]);
           <div className="text-gray-700 text-sm line-clamp-2" dangerouslySetInnerHTML={{ __html: post.contenu.substring(0, 150) + '...' }} />
           <Link 
             to={`/post/${post.id}`} 
-            className="mt-2 inline-block text-sm text-[#063267] hover:underline"
+            className="bg-[#063267] hover:bg-[#0a4a94] text-white py-2 px-4 rounded-md transition-colors duration-300 inline-block"
           >
-            Leer más
+            Lire la suite
           </Link>
         </div>
       </div>

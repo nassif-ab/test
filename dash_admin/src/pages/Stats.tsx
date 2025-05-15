@@ -46,7 +46,7 @@ const Stats: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#063267]"></div>
       </div>
     );
   }
@@ -71,13 +71,13 @@ const Stats: React.FC = () => {
       {/* Pestañas para cambiar entre estadísticas generales y de usuario */}
       <div className="flex mb-6 border-b">
         <button
-          className={`px-4 py-2 ${activeTab === 'general' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
+          className={`px-4 py-2 ${activeTab === 'general' ? 'border-b-2 border-[#063267] text-[#063267]' : 'text-gray-500'}`}
           onClick={() => setActiveTab('general')}
         >
           Statistiques générales
         </button>
         <button
-          className={`px-4 py-2 ${activeTab === 'user' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500'}`}
+          className={`px-4 py-2 ${activeTab === 'user' ? 'border-b-2 border-[#063267] text-[#063267]' : 'text-gray-500'}`}
           onClick={() => setActiveTab('user')}
         >
           Statistiques utilisateurs
@@ -96,7 +96,7 @@ const Stats: React.FC = () => {
             </label>
             <select
               id="user-select"
-              className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#063267] focus:border-[#063267]"
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
             >

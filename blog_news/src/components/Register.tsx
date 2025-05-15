@@ -17,19 +17,19 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
     
     // Validación básica
     if (!username.trim() || !email.trim() || !password.trim()) {
-      setError('الرجاء إدخال جميع الحقول المطلوبة');
+      setError('Veuillez entrer tous les champs requis');
       return;
     }
     
     if (password !== confirmPassword) {
-      setError('كلمات المرور غير متطابقة');
+      setError('Les mots de passe ne correspondent pas');
       return;
     }
     
     // Validación simple de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('الرجاء إدخال بريد إلكتروني صحيح');
+      setError('Veuillez entrer un email valide');
       return;
     }
     
@@ -38,7 +38,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-bold text-center text-[#063267] mb-6">إنشاء حساب جديد</h2>
+      <h2 className="text-2xl font-bold text-center text-[#063267] mb-6">Créer un compte</h2>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
@@ -49,7 +49,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="username" className="block text-sm font-medium text-gray-700 text-right">
-            اسم المستخدم
+            Nom d'utilisateur
           </label>
           <input
             type="text"
@@ -57,13 +57,13 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#063267] focus:border-[#063267]"
-            dir="rtl"
+            
           />
         </div>
         
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 text-right">
-            البريد الإلكتروني
+            Email
           </label>
           <input
             type="email"
@@ -71,13 +71,13 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#063267] focus:border-[#063267]"
-            dir="rtl"
+            
           />
         </div>
         
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 text-right">
-            كلمة المرور
+            Mot de passe
           </label>
           <input
             type="password"
@@ -85,13 +85,13 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#063267] focus:border-[#063267]"
-            dir="rtl"
+            
           />
         </div>
         
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 text-right">
-            تأكيد كلمة المرور
+            Confirmer le mot de passe
           </label>
           <input
             type="password"
@@ -99,7 +99,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#063267] focus:border-[#063267]"
-            dir="rtl"
+            
           />
         </div>
         
@@ -108,7 +108,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#063267] hover:bg-[#052a56] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#063267]"
           >
-            إنشاء حساب
+            Créer un compte
           </button>
         </div>
       </form>
@@ -118,7 +118,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
           onClick={onSwitchToLogin}
           className="text-sm text-[#063267] hover:underline"
         >
-          لديك حساب بالفعل؟ تسجيل الدخول
+          Vous avez déjà un compte ? Se connecter
         </button>
       </div>
     </div>

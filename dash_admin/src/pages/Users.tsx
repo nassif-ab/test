@@ -49,7 +49,7 @@ const Users: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#063267]"></div>
       </div>
     );
   }
@@ -98,7 +98,7 @@ const Users: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button 
                         onClick={() => handleUserSelect(user.id)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-[#063267] hover:text-[#063267]"
                       >
                         Voir détails
                       </button>
@@ -120,7 +120,7 @@ const Users: React.FC = () => {
             </div>
           ) : statsLoading ? (
             <div className="flex justify-center items-center py-10">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#063267]"></div>
             </div>
           ) : userStats ? (
             <div className="space-y-6">
@@ -131,15 +131,15 @@ const Users: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-indigo-50 rounded-lg p-4">
                   <h4 className="text-sm font-medium text-indigo-700">Publications</h4>
-                  <p className="text-2xl font-bold text-indigo-900">{userStats.total_posts}</p>
+                  <p className="text-2xl font-bold text-[#063267]">{userStats.total_posts}</p>
                 </div>
                 <div className="bg-indigo-50 rounded-lg p-4">
                   <h4 className="text-sm font-medium text-indigo-700">J'aime</h4>
-                  <p className="text-2xl font-bold text-indigo-900">{userStats.total_likes}</p>
+                  <p className="text-2xl font-bold text-[#063267]">{userStats.total_likes}</p>
                 </div>
                 <div className="bg-indigo-50 rounded-lg p-4">
                   <h4 className="text-sm font-medium text-indigo-700">Visites</h4>
-                  <p className="text-2xl font-bold text-indigo-900">{userStats.total_visits}</p>
+                  <p className="text-2xl font-bold text-[#063267]">{userStats.total_visits}</p>
                 </div>
               </div>
               

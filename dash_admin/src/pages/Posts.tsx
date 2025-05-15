@@ -99,7 +99,7 @@ const Posts: React.FC = () => {
   if (loading && posts.length === 0) {
     return (
       <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#063267]"></div>
       </div>
     );
   }
@@ -114,7 +114,7 @@ const Posts: React.FC = () => {
             setFormData({ title: '', content: '', categorie: '', image: '' });
             setShowForm(!showForm);
           }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded"
+          className="bg-[#063267] hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded"
         >
           {showForm ? 'Annuler' : 'Ajouter une nouvelle publication'}
         </button>
@@ -196,7 +196,7 @@ const Posts: React.FC = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded"
+                className="bg-[#063267] hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded"
               >
                 {editingPost ? 'Mettre à jour la publication' : 'Créer la publication'}
               </button>
@@ -246,7 +246,7 @@ const Posts: React.FC = () => {
                   <button 
                     onClick={() =>{ handleEditPost(post)
                       }}
-                    className="text-indigo-600 hover:text-indigo-900"
+                    className="text-[#063267] hover:text-[#063267]"
                   >
                     Modifier
                   </button>

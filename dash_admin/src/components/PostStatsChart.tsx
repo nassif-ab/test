@@ -96,7 +96,7 @@ const PostStatsChart: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#063267]"></div>
       </div>
     );
   }
@@ -244,7 +244,7 @@ const PostStatsChart: React.FC = () => {
         <h3 className="text-lg font-semibold mb-4">Résumé des statistiques</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-indigo-50 p-4 rounded-lg">
-            <p className="text-sm text-indigo-600">Total des publications</p>
+            <p className="text-sm text-[#063267]">Total des publications</p>
             <p className="text-2xl font-bold">{stats.total_posts}</p>
           </div>
           <div className="bg-pink-50 p-4 rounded-lg">

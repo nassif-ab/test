@@ -1,56 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import PostsList from "./components/PostsList";
 import PostCard from "./components/PostCard";
 import PostDetail from "./pages/PostDetail";
 import { getPosts, PostUI, getUserRecommendations } from "./services/api";
 import { useAuth } from "./content/AuthProvider";
+import { LoginModalProvider } from "./content/LoginModalContext";
 
-// المنشورات الافتراضية التي ستظهر قبل تحميل المنشورات من الخادم
-const defaultArticles = [
-  {
-    titre: "Introduction à l'Intelligence Artificielle",
-    image: "/post.jpg",
-    contenu: "L'intelligence artificielle (IA) transforme de nombreux secteurs, de la santé à la finance. Elle permet aux machines de simuler l'intelligence humaine pour réaliser des tâches telles que la reconnaissance vocale, la traduction automatique et la prise de décision. Cet article présente les bases de l'IA et ses principales applications."
-  },
-  {
-    titre: "Installation d'un environnement de développement Python",
-    image: "/post.jpg",
-    contenu: "Pour commencer le développement en Python, il est essentiel d'installer un environnement adapté. Cela inclut l'installation de Python, d'un éditeur de code comme VS Code, et d'un gestionnaire de paquets tel que pip ou conda. Ce guide vous explique comment configurer votre environnement pas à pas."
-  },
-  {
-    titre: "Utilisation de Docker pour les projets Data",
-    image: "/post.jpg",
-    contenu: "Docker est devenu un outil incontournable pour les data engineers et les développeurs. Il permet de créer des environnements reproductibles et portables pour les projets de science des données. Apprenez comment containeriser vos scripts Python et vos notebooks Jupyter pour une meilleure gestion des dépendances."
-  },
-  {
-    titre: "Déployer une API avec FastAPI",
-    image: "/post.jpg",
-    contenu: "FastAPI est un framework Python moderne et rapide pour créer des APIs. Grâce à sa compatibilité avec OpenAPI et sa simplicité, il est idéal pour construire des services backend performants. Dans cet article, découvrez comment créer, documenter et déployer une API REST avec FastAPI."
-  },
-  {
-    titre: "Big Data : Introduction à Apache Spark",
-    image: "/post.jpg",
-    contenu: "Apache Spark est un moteur de traitement distribué largement utilisé dans le Big Data. Il permet le traitement de grandes quantités de données en mémoire, rendant les analyses beaucoup plus rapides. Apprenez les bases de Spark, son architecture, et comment exécuter votre premier job Spark."
-  }
-]
-interface Post {
-  titre: string;
-  image: string;
-  contenu: string;
-  isliked: boolean;
-  likes: number;
-}
 
 function App() {
-  // استخدام سياق المصادقة
   const { token, isAuthenticated, user } = useAuth();
   const [posts, setPosts] = useState<PostUI[]>([]);
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<PostUI[]>([]);
 
-  // جلب المنشورات من الخادم عند تحميل الصفحة
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -60,7 +24,7 @@ function App() {
           setPosts(fetchedPosts.map(post => ({
             id: post.id,
             titre: post.title,
-            image: post.image || "/post.jpg", // Usar la imagen del backend o una imagen por defecto
+            image: post.image || "/post.jpg",
             contenu: post.content,
             isliked: post.isliked || false,
             likes: post.likes || 0,
@@ -70,7 +34,6 @@ function App() {
         }
       } catch (error) {
         console.error('Error fetching posts:', error);
-        // في حالة فشل جلب المنشورات، نستخدم المنشورات الافتراضية
       } finally {
         setLoading(false);
       }
@@ -104,19 +67,19 @@ function App() {
   }, [isAuthenticated, user, token]);
 
   return (
-    <Router>
-      <div className="bg-[#f8f9fb] min-h-screen flex flex-col">
-        <Header />
-
-        <Routes>
-          <Route path="/" element={
+      <Router>
+        <LoginModalProvider>
+          <div className="min-h-screen bg-gray-50">
+            <Header />
+          
+          <Routes>
+            <Route path="/" element={
             <>
-              {/* المنشورات */}
-              <PostsList posts={posts} />
-              {isAuthenticated && recommendations.length > 0 && (
+
+{isAuthenticated && recommendations.length > 0 && (
   <div className="container mx-auto px-4 py-8">
-    <h2 className="text-2xl font-bold mb-6 text-center text-[#063267]">Recomendado para ti</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <h2 className="text-2xl font-bold mb-6 text-center text-[#063267]">Recommandé pour vous</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
       {recommendations.map((post, index) => (
         <PostCard 
           key={index}
@@ -210,12 +173,19 @@ function App() {
                   </div>
                 ))}
               </section>
+            
+              {/* المنشورات */}
+              <PostsList posts={posts} />
+
             </>
           } />
           <Route path="/post/:id" element={<PostDetail />} />
-        </Routes>
-      </div>
-    </Router>
+          <Route path="*" element={<Navigate to="/" />} />
+          
+          </Routes>
+          </div>
+        </LoginModalProvider>
+      </Router>
   );
 }
 

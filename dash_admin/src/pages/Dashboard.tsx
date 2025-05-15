@@ -43,7 +43,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#063267]"></div>
       </div>
     );
   }
@@ -65,22 +65,22 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-700">Total des Publications</h2>
-          <p className="text-3xl font-bold text-indigo-600">{stats?.total_posts || 0}</p>
+          <p className="text-3xl font-bold text-[#063267]">{stats?.total_posts || 0}</p>
         </div>
         
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-700">Total des Likes</h2>
-          <p className="text-3xl font-bold text-indigo-600">{stats?.total_likes || 0}</p>
+          <p className="text-3xl font-bold text-[#063267]">{stats?.total_likes || 0}</p>
         </div>
         
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-700">Total des Visites</h2>
-          <p className="text-3xl font-bold text-indigo-600">{stats?.total_visits || 0}</p>
+          <p className="text-3xl font-bold text-[#063267]">{stats?.total_visits || 0}</p>
         </div>
         
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-700">Utilisateurs</h2>
-          <p className="text-3xl font-bold text-indigo-600">{users.length}</p>
+          <p className="text-3xl font-bold text-[#063267]">{users.length}</p>
         </div>
       </div>
       

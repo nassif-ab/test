@@ -176,6 +176,7 @@ def read_post(
         "title": post.title,
         "content": post.content,
         "image": post.image,
+        "categorie": post.categorie,
         "created_at": post.created_at,
         # Contar el número total de likes
         "likes": db.query(models.Like).filter(models.Like.post_id == post.id).count(),
@@ -265,21 +266,54 @@ from routers.auth import get_current_user
 
 # Endpoint para obtener recomendaciones para un usuario
 @router.get("/user/{user_id}/recommendations", response_model=List[schemas.PostBase])
-def get_recommendations_for_user(user_id: int, n_recommendations: int = 5, db: Session = Depends(get_db)):
+def get_recommendations_for_user(user_id: int, n_recommendations: int = 4, db: Session = Depends(get_db)):
     """Obtiene recomendaciones de posts para un usuario específico"""
     print(f"Obteniendo recomendaciones para el usuario {user_id}")
     
-    # Obtener recomendaciones
+    # Obtener recomendaciones básicas
     recommendations = recommendation_system.get_recommendations_for_user(user_id, n_recommendations)
+    
+    # Obtener el usuario actual para verificar los likes
+    current_user = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    # Enriquecer las recomendaciones con información de likes y visitas
+    for post in recommendations:
+        # Verificar si el usuario ha dado like a este post
+        post["isliked"] = db.query(models.Like).filter(
+            models.Like.post_id == post["id"],
+            models.Like.user_id == user_id
+        ).first() is not None
+        
+        # Actualizar contadores de likes y visitas
+        post["likes"] = db.query(models.Like).filter(models.Like.post_id == post["id"]).count()
+        post["visits"] = db.query(models.Visit).filter(models.Visit.post_id == post["id"]).count()
     
     print(f"Se encontraron {len(recommendations)} recomendaciones")
     return recommendations
 
 # Endpoint para obtener posts similares a un post específico
 @router.get("/{post_id}/similar", response_model=List[schemas.PostBase])
-def get_similar_posts(post_id: int, n_recommendations: int = 5, db: Session = Depends(get_db)):
+def get_similar_posts(post_id: int, n_recommendations: int = 5, db: Session = Depends(get_db), current_user = Depends(get_optional_user)):
     """Obtiene posts similares a un post específico"""
     print(f"Obteniendo posts similares al post {post_id}")
+    
+    # Obtener posts similares
     similar_posts = recommendation_system.get_similar_posts(post_id, n_recommendations)
+    
+    # Enriquecer los posts similares con información de likes y visitas
+    for post in similar_posts:
+        # Verificar si el usuario ha dado like a este post (si está autenticado)
+        if current_user:
+            post["isliked"] = db.query(models.Like).filter(
+                models.Like.post_id == post["id"],
+                models.Like.user_id == current_user.id
+            ).first() is not None
+        else:
+            post["isliked"] = False
+        
+        # Actualizar contadores de likes y visitas
+        post["likes"] = db.query(models.Like).filter(models.Like.post_id == post["id"]).count()
+        post["visits"] = db.query(models.Visit).filter(models.Visit.post_id == post["id"]).count()
+    
     print(f"Se encontraron {len(similar_posts)} posts similares")
     return similar_posts

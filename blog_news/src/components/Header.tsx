@@ -62,13 +62,13 @@ const Header = () => {
     {user ? (
       <div className="flex items-center gap-3">
         <span className="text-[#063267]">
-          مرحباً، {user.username}
+          bienvenue {user.username}
         </span>
         <button 
           onClick={handleLogout}
           className="bg-[#063267] text-white px-3 py-1 rounded-md text-xs hover:bg-[#052a56] transition-colors"
         >
-          تسجيل الخروج
+          Déconnexion
         </button>
       </div>
     ) : (
@@ -76,7 +76,7 @@ const Header = () => {
         onClick={() => setIsAuthModalOpen(true)}
         className="bg-[#063267] text-white px-3 py-1 rounded-md text-xs hover:bg-[#052a56] transition-colors"
       >
-        تسجيل الدخول / إنشاء حساب
+        Se connecter / S'inscrire
       </button>
     )}
   </nav>

@@ -32,6 +32,29 @@ const LogoutIcon = () => (
   </svg>
 );
 
+const menuList = [
+  {
+    name: "Accueil",
+    link: "/admin",
+    icon: <DashboardIcon />
+  },
+  {
+    name: "Utilisateurs",
+    link: "/admin/users",
+    icon: <UsersIcon />
+  },
+  {
+    name: "Publications",
+    link: "/admin/posts",
+    icon: <PostsIcon />
+  },
+  {
+    name: "Statistiques",
+    link: "/admin/stats",
+    icon: <StatsIcon />
+  }
+];
+
 interface SidebarProps {
   onLogout: () => void;
 }
@@ -40,48 +63,32 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const location = useLocation();
   
   const isActive = (path: string) => {
-    return location.pathname === path ? 'bg-indigo-800 text-white' : 'text-gray-300 hover:bg-indigo-700 hover:text-white';
+    return location.pathname === path ? 'bg-white text-[#063267]' : 'text-gray-300 hover:bg-white/90 hover:text-[#063267]';
   };
 
   return (
-    <div className="h-screen w-64 bg-indigo-900 text-white flex flex-col">
+    <div className="h-screen w-64 bg-[#063267] text-white flex flex-col">
       <div className="p-5 border-b border-indigo-800">
-        <h1 className="text-2xl font-bold">Administration</h1>
+        <img src="/logo.png" alt="Logo" className="w-96" />
       </div>
       
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-2 px-2">
-          <li>
-            <Link to="/admin" className={`flex items-center p-3 rounded-md ${isActive('/admin')}`}>
-              <DashboardIcon />
-              <span className="ml-3">Accueil</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/users" className={`flex items-center p-3 rounded-md ${isActive('/admin/users')}`}>
-              <UsersIcon />
-              <span className="ml-3">Utilisateurs</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/posts" className={`flex items-center p-3 rounded-md ${isActive('/admin/posts')}`}>
-              <PostsIcon />
-              <span className="ml-3">Publications</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/stats" className={`flex items-center p-3 rounded-md ${isActive('/admin/stats')}`}>
-              <StatsIcon />
-              <span className="ml-3">Statistiques</span>
-            </Link>
-          </li>
+          {menuList.map((item, index) => (
+            <li key={index}>
+              <Link to={item.link} className={`flex items-center p-3 rounded-md ${isActive(item.link)}`}>
+                {item.icon}
+                <span className="ml-3">{item.name}</span>
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
       
       <div className="p-4 border-t border-indigo-800">
         <button 
           onClick={onLogout}
-          className="flex items-center p-3 w-full text-left rounded-md text-gray-300 hover:bg-indigo-700 hover:text-white"
+          className="flex items-center p-3 w-full text-left rounded-md text-gray-300 hover:bg-red-500 hover:text-white"
         >
           <LogoutIcon />
           <span className="ml-3">Déconnexion</span>

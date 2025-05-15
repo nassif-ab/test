@@ -274,9 +274,9 @@ export const getUserRecommendations = async (userId: string | number, token?: st
       titre: post.title,
       image: post.image || "/post.jpg",
       contenu: post.content,
-      isliked: false, // Por defecto no sabemos si le gustó
-      likes: 0,       // No tenemos esta información aquí
-      visits: 0,      // No tenemos esta información aquí
+      isliked: post.isliked || false, // Usar el valor de la API o false por defecto
+      likes: post.likes || 0,         // Usar el valor de la API o 0 por defecto
+      visits: post.visits || 0,        // Usar el valor de la API o 0 por defecto
       categorie: post.categorie
     }));
     
@@ -300,9 +300,9 @@ export const getSimilarPosts = async (postId: string | number): Promise<PostUI[]
       titre: post.title,
       image: post.image || "/post.jpg",
       contenu: post.content,
-      isliked: false, // Por defecto no sabemos si le gustó
-      likes: 0,       // No tenemos esta información aquí
-      visits: 0,      // No tenemos esta información aquí
+      isliked: post.isliked || false, // Usar el valor de la API o false por defecto
+      likes: post.likes || 0,         // Usar el valor de la API o 0 por defecto
+      visits: post.visits || 0,        // Usar el valor de la API o 0 por defecto
       categorie: post.categorie
     }));
   } catch (error: any) {

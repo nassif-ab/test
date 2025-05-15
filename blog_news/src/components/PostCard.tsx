@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../content/AuthProvider';
 import { likePost } from '../services/api';
 import { Link } from 'react-router-dom';
+import { useLoginModal } from '../content/LoginModalContext';
 
 interface PostCardProps {
   titre: string;
@@ -16,6 +17,7 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ id, titre, image, contenu, isliked=false, likes=0, visits=0, categorie="" }) => {
   const { token, isAuthenticated } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const [liked, setLiked] = useState(isliked);
   const [likeCount, setLikeCount] = useState(likes);
   const [isLiking, setIsLiking] = useState(false);
@@ -29,7 +31,8 @@ const PostCard: React.FC<PostCardProps> = ({ id, titre, image, contenu, isliked=
     console.log('token:', token ? 'Existe' : 'No existe');
     
     if (!isAuthenticated) {
-      console.log('No autenticado, saliendo');
+      console.log('No autenticado, mostrando modal de login');
+      openLoginModal();
       return;
     }
     
@@ -96,8 +99,8 @@ const PostCard: React.FC<PostCardProps> = ({ id, titre, image, contenu, isliked=
             {/* Botón de like */}
             <button 
               onClick={handleLike}
-              disabled={!isAuthenticated || isLiking}
-              className={`flex items-center gap-1 px-3 py-1 rounded-full transition-colors ${liked ? 'text-red-500' : 'text-gray-500'} ${isAuthenticated ? 'hover:bg-gray-100' : ''}`}
+              disabled={isLiking}
+              className={`flex items-center gap-1 px-3 py-1 rounded-full transition-colors ${liked ? 'text-red-500' : 'text-gray-500'} hover:bg-gray-100`}
               title={isAuthenticated ? 'Me gusta' : 'Inicia sesión para dar like'}
             >
               <svg 
