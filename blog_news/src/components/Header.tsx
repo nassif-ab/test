@@ -52,10 +52,10 @@ const Header = () => {
     </div> */}
   </div>
   {/* Top menu */}
-  <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-700 uppercase">
+  <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-700">
     
     {mainMenuItems.map((item) => (
-      <Link key={item.label} to={item.href} className="hover:underline">
+      <Link key={item.label} to={item.href} className="uppercase hover:underline">
         {item.label}
       </Link>
     ))}
@@ -85,7 +85,7 @@ const Header = () => {
 <div className="bg-[#063267] text-white text-sm font-semibold px-2 py-2">
   <nav className="flex flex-wrap gap-x-8 gap-y-2 justify-center max-w-6xl mx-auto">
     {secondaryMenuItems.map((item) => (
-      <Link key={item.label} to={item.href} className="hover:underline">
+      <Link key={item.label} to={item.href} className="uppercase hover:underline">
         {item.label}
       </Link>
     ))}

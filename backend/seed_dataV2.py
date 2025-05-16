@@ -9,6 +9,24 @@ import markdown
 
 # Dossier des fichiers JSON générés
 ARTICLE_DIR = "generated_articles"
+def get_image_name(nom_filiere: str) -> str:
+    mapping = {
+        "Génie Informatique": "genie-informatique.jpg",
+        "Génie Électrique": "genie-electrique.jpg",
+        "Génie Industriel": "genie-industriel.jpg",
+        "Génie Mécatronique": "genie-mecatronique.jpg",
+        "Réseaux et Systèmes de Télécommunications": "reseaux-telecommunications.jpg",
+        "Efficacité Énergétique et Bâtiment Intelligent": "efficacite-energetique-batiment.jpg",
+        "Génie Civil": "genie-civil.jpg",
+        "Sécurité des Systèmes d’Information": "securite-systemes-information.jpg",
+        "Intelligence Artificielle et IoT pour l’Industrie 4.0": "ia-iot-industrie4.jpg",
+        "Management de la Supply Chain": "management-supply-chain.jpg",
+        "Génie Mécanique et Aéronautique": "genie-mecanique-aeronautique.jpg",
+        "Génie Électrique et Énergies Renouvelables": "genie-electrique-energies.jpg",
+        "Licence en Génie Industriel": "licence-genie-industriel.jpg"
+    }
+    
+    return mapping.get(f"/media/{nom_filiere}", "/media/default.jpg")
 
 def load_articles_from_json(directory):
     articles = []
@@ -31,7 +49,7 @@ def seed_articles(db: Session, articles):
         try:
             post_data = PostCreate(
                 title=article["titre"],  # Cambiar titre a title
-                image=article["image"],
+                image=get_image_name(article["categorie"]),
                 content=markdown.markdown(article["contenu"]),  # Cambiar contenu a content
                 categorie=article["categorie"]
             )

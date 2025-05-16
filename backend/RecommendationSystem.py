@@ -28,8 +28,10 @@ class RecommendationSystem:
         self.similar_posts_cache = {}
         # Cuándo se actualizó el caché por última vez
         self.last_cache_update = datetime.datetime.now()
+        
         # Tiempo de expiración del caché (12 horas)
-        self.cache_expiry = datetime.timedelta(hours=12)
+        #########self.cache_expiry = datetime.timedelta(hours=12)
+        self.cache_expiry = datetime.timedelta(minutes=10)
         
     def _is_cache_valid(self):
         """Verifica si el caché es válido o ha expirado"""
@@ -139,6 +141,8 @@ class RecommendationSystem:
                 # Dar más peso a los likes (x3) que a las visitas (x1)
                 like_weight = 3 if post.id in [like.post_id for like in user_likes] else 0
                 visit_weight = 1 if post.id in [visit.post_id for visit in user_visits] else 0
+                # like_weight = 3 if post.id in [like.post_id for like in user_likes] else 0
+                # visit_weight = 1 if post.id in [visit.post_id for visit in user_visits] else 0
                 category_weights[post.categorie] += (like_weight + visit_weight)
             
             # Ordenar categorías por peso

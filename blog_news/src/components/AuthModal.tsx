@@ -19,12 +19,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const handleLogin = async (username: string, password: string) => {
     setLoading(true);
     try {
-      // استخدام سياق المصادقة للتسجيل الدخول
       await login(username, password);
       onClose();
     } catch (error: any) {
       console.error('Login error:', error);
-      // إظهار رسالة الخطأ للمستخدم
       const errorMessage = error.message || 'حدث خطأ أثناء تسجيل الدخول';
       alert(errorMessage);
     } finally {
@@ -59,7 +57,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="relative w-full max-w-md">
-        {/* زر الإغلاق */}
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10"
@@ -70,14 +67,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </svg>
         </button>
         
-        {/* مؤشر التحميل */}
+        
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#063267]"></div>
           </div>
         )}
         
-        {/* نموذج تسجيل الدخول أو إنشاء الحساب */}
+        
         {showLogin ? (
           <Login 
             onLogin={handleLogin} 

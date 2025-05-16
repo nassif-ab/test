@@ -1,14 +1,33 @@
+import pymysql
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite:///./test.db"  # أو PostgreSQL مثلاً: postgresql://user:pass@localhost/dbname
+DB_USER = "root"
+DB_PASSWORD = ""
+DB_HOST = "localhost"
+DB_PORT = "3306"
+DB_NAME = "pfe_database"
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# أولاً، الاتصال بدون تحديد قاعدة بيانات
+connection = pymysql.connect(
+    host=DB_HOST,
+    user=DB_USER,
+    password=DB_PASSWORD,
+    port=int(DB_PORT)
+)
+
+with connection.cursor() as cursor:
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+connection.close()
+
+# بعدها، الاتصال بـ SQLAlchemy باستخدام قاعدة البيانات
+DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
+
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 
-# Función para obtener una conexión a la base de datos
 def get_db():
     db = SessionLocal()
     try:

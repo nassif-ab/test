@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, func
 import models, schemas
 
 # ====== USERS ======
@@ -184,7 +185,11 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_user_by_username(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+    username = username.strip().lower()
+    return db.query(models.User).filter(or_(
+        func.lower(func.trim(models.User.username)) == username,
+        func.lower(func.trim(models.User.email)) == username
+    )).first()
 
 def authenticate_user(db: Session, username: str, password: str):
     user = get_user_by_username(db, username)
