@@ -78,7 +78,9 @@ def main():
     output_dir = setup_output_directory()
     
     # List of topics to generate articles about
+    # Liste complète des catégories incluant les nouvelles catégories
     catg = [
+    # Catégories originales
     "Génie Informatique",
     "Génie Électrique",
     "Génie Industriel",
@@ -86,104 +88,211 @@ def main():
     "Réseaux et Systèmes de Télécommunications",
     "Efficacité Énergétique et Bâtiment Intelligent",
     "Génie Civil",
-    "Sécurité des Systèmes d’Information",
-    "Intelligence Artificielle et IoT pour l’Industrie 4.0",
+    "Sécurité des Systèmes d'Information",
+    "Intelligence Artificielle et IoT pour l'Industrie 4.0",
     "Management de la Supply Chain",
     "Génie Mécanique et Aéronautique",
     "Génie Électrique et Énergies Renouvelables",
-    "Licence en Génie Industriel"
+    "Licence en Génie Industriel",
+    "Big Data et Analytics",
+    "Développement Logiciel",
+    "DevOps et CI/CD",
+    
+    # Nouvelles catégories
+    "Blockchain et Technologies Distribuées",
+    "Cybersécurité Offensive et Défensive",
+    "Systèmes Embarqués et IoT",
+    "Cloud Computing et Virtualisation",
+    "Réalité Virtuelle et Augmentée",
+    "Intelligence Artificielle et Data Science",
+    "Robotique Avancée",
+    "Biotechnologie et Ingénierie Biomédicale",
+    "Gestion de Projets Technologiques",
+    "Design de l'Expérience Utilisateur (UX/UI)"
 ]
+
     topics = [
-    # Génie Informatique
-    "Développement d’une application mobile de gestion de stock pour les PME",
-    "Mise en place d’un système de détection d’intrusion basé sur le Machine Learning",
-    "Conception d’une architecture microservices pour une plateforme e-commerce",
-    "Implémentation d’une solution DevSecOps pour un projet web",
-    "Optimisation de la performance d’une application web à forte charge",
+    # Génie Informatique (original)
+    "Développement d'une application mobile de gestion de stock pour les PME",
+    "Mise en place d'un système de détection d'intrusion basé sur le Machine Learning",
+    "Conception d'une architecture microservices pour une plateforme e-commerce",
+    "Implémentation d'une solution DevSecOps pour un projet web",
+    "Optimisation de la performance d'une application web à forte charge",
 
-    # Génie Électrique
-    "Conception d’un système de gestion intelligente d’un panneau solaire",
-    "Étude et réalisation d’un chargeur rapide pour véhicules électriques",
-    "Commande d’un moteur brushless à l’aide d’un microcontrôleur ESP32",
+    # Génie Électrique (original)
+    "Conception d'un système de gestion intelligente d'un panneau solaire",
+    "Étude et réalisation d'un chargeur rapide pour véhicules électriques",
+    "Commande d'un moteur brushless à l'aide d'un microcontrôleur ESP32",
     "Intégration de systèmes embarqués pour la surveillance énergétique",
-    "Simulation et analyse d’un réseau électrique intelligent (smart grid)",
+    "Simulation et analyse d'un réseau électrique intelligent (smart grid)",
 
-    # Génie Industriel
-    "Optimisation des flux logistiques dans un entrepôt à l’aide de la simulation",
-    "Mise en place d’un système Kanban dans une entreprise de fabrication",
+    # Génie Industriel (original)
+    "Optimisation des flux logistiques dans un entrepôt à l'aide de la simulation",
+    "Mise en place d'un système Kanban dans une entreprise de fabrication",
     "Application de la méthode Lean Six Sigma pour améliorer un processus industriel",
-    "Conception d’un tableau de bord pour le suivi de la performance industrielle",
+    "Conception d'un tableau de bord pour le suivi de la performance industrielle",
     "Automatisation de la gestion des stocks avec RFID et IoT",
 
-    # Génie Mécatronique
-    "Conception et programmation d’un robot suiveur de ligne autonome",
-    "Développement d’un bras robotique piloté par vision artificielle",
+    # Génie Mécatronique (original)
+    "Conception et programmation d'un robot suiveur de ligne autonome",
+    "Développement d'un bras robotique piloté par vision artificielle",
     "Système de surveillance intelligente pour véhicule (ADAS simplifié)",
-    "Contrôle d’un drone autonome via des capteurs embarqués",
-    "Simulation d’un système mécatronique pour la fabrication intelligente",
+    "Contrôle d'un drone autonome via des capteurs embarqués",
+    "Simulation d'un système mécatronique pour la fabrication intelligente",
 
-    # Réseaux et Systèmes de Télécommunications
-    "Déploiement d’un réseau LTE local avec Open5GS",
-    "Mise en œuvre d’un système de VoIP sécurisé avec Asterisk",
+    # Réseaux et Systèmes de Télécommunications (original)
+    "Déploiement d'un réseau LTE local avec Open5GS",
+    "Mise en œuvre d'un système de VoIP sécurisé avec Asterisk",
     "Étude comparative de protocoles de routage dans un réseau MANET",
     "Sécurisation des communications dans un réseau IoT",
-    "Détection d’intrusions réseau à l’aide d’un IDS basé sur le Deep Learning",
+    "Détection d'intrusions réseau à l'aide d'un IDS basé sur le Deep Learning",
 
-    # Efficacité Énergétique et Bâtiment Intelligent
-    "Conception d’un système domotique à faible coût contrôlé par smartphone",
-    "Analyse thermique et énergétique d’un bâtiment avec logiciel TRNSYS",
-    "Optimisation de la consommation d’énergie d’un bâtiment intelligent avec IoT",
-    "Simulation d’un système de ventilation naturel et son impact énergétique",
+    # Efficacité Énergétique et Bâtiment Intelligent (original)
+    "Conception d'un système domotique à faible coût contrôlé par smartphone",
+    "Analyse thermique et énergétique d'un bâtiment avec logiciel TRNSYS",
+    "Optimisation de la consommation d'énergie d'un bâtiment intelligent avec IoT",
+    "Simulation d'un système de ventilation naturel et son impact énergétique",
     "Intégration de panneaux photovoltaïques dans un bâtiment autonome",
 
-    # Génie Civil
-    "Étude et dimensionnement d’un pont en béton armé",
+    # Génie Civil (original)
+    "Étude et dimensionnement d'un pont en béton armé",
     "Optimisation des matériaux de construction pour une durabilité accrue",
-    "Conception d’un système de drainage urbain pour zones inondables",
-    "Analyse de la résistance sismique d’une structure en béton armé",
+    "Conception d'un système de drainage urbain pour zones inondables",
+    "Analyse de la résistance sismique d'une structure en béton armé",
     "Simulation de flux de chantier avec MS Project ou Primavera",
 
-    # Masters Spécialisés - Sécurité des Systèmes d’Information
-    "Détection d’attaques par ransomware via analyse comportementale",
-    "Mise en œuvre d’un SIEM open-source pour la supervision de sécurité",
-    "Étude de la sécurité des API RESTful dans les systèmes d’entreprise",
+    # Sécurité des Systèmes d'Information (original)
+    "Détection d'attaques par ransomware via analyse comportementale",
+    "Mise en œuvre d'un SIEM open-source pour la supervision de sécurité",
+    "Étude de la sécurité des API RESTful dans les systèmes d'entreprise",
     "Analyse des risques liés à la cybersécurité dans les systèmes industriels (SCADA)",
     "Application des normes ISO 27001 dans un système d'information hospitalier",
 
-    # Master en Intelligence Artificielle et IoT pour l’Industrie 4.0
-    "Système de maintenance prédictive basé sur l’IA pour une ligne de production",
+    # Intelligence Artificielle et IoT pour l'Industrie 4.0 (original)
+    "Système de maintenance prédictive basé sur l'IA pour une ligne de production",
     "Surveillance environnementale via capteurs IoT et traitement IA",
-    "Optimisation énergétique d’un site industriel par Deep Reinforcement Learning",
-    "Détection de défauts de fabrication à l’aide de vision par ordinateur",
-    "Intégration d’un système IoT intelligent pour la gestion des ressources en usine",
+    "Optimisation énergétique d'un site industriel par Deep Reinforcement Learning",
+    "Détection de défauts de fabrication à l'aide de vision par ordinateur",
+    "Intégration d'un système IoT intelligent pour la gestion des ressources en usine",
 
-    # Master en Management de la Supply Chain
-    "Application du Data Analytics dans l’optimisation de la chaîne logistique",
-    "Étude d’impact de la digitalisation sur la performance logistique",
-    "Conception d’un tableau de bord KPI pour le suivi de la supply chain",
-    "Intégration d’un WMS (Warehouse Management System) dans un entrepôt",
-    "Simulation d’un réseau logistique résilient face aux crises",
+    # Management de la Supply Chain (original)
+    "Application du Data Analytics dans l'optimisation de la chaîne logistique",
+    "Étude d'impact de la digitalisation sur la performance logistique",
+    "Conception d'un tableau de bord KPI pour le suivi de la supply chain",
+    "Intégration d'un WMS (Warehouse Management System) dans un entrepôt",
+    "Simulation d'un réseau logistique résilient face aux crises",
 
-    # Licences Professionnelles - Génie Mécanique et Aéronautique
-    "Étude aérodynamique d’un drone via simulation CFD",
-    "Conception d’un mini-compresseur pour système de propulsion",
-    "Optimisation d’une structure d’aile d’avion par la méthode des éléments finis",
-    "Étude thermique d’un moteur à combustion interne",
-    "Réalisation d’un prototype de système de freinage automatique",
+    # Génie Mécanique et Aéronautique (original)
+    "Étude aérodynamique d'un drone via simulation CFD",
+    "Conception d'un mini-compresseur pour système de propulsion",
+    "Optimisation d'une structure d'aile d'avion par la méthode des éléments finis",
+    "Étude thermique d'un moteur à combustion interne",
+    "Réalisation d'un prototype de système de freinage automatique",
 
-    # Licence en Génie Électrique et Énergies Renouvelables
-    "Dimensionnement d’un système photovoltaïque pour maison isolée",
-    "Suivi et analyse de la performance d’un champ solaire réel",
-    "Étude d’un convertisseur DC-DC pour applications solaires",
-    "Conception d’une éolienne domestique intelligente",
-    "Monitoring en temps réel de l’énergie produite par capteurs solaires",
+    # Génie Électrique et Énergies Renouvelables (original)
+    "Dimensionnement d'un système photovoltaïque pour maison isolée",
+    "Suivi et analyse de la performance d'un champ solaire réel",
+    "Étude d'un convertisseur DC-DC pour applications solaires",
+    "Conception d'une éolienne domestique intelligente",
+    "Monitoring en temps réel de l'énergie produite par capteurs solaires",
 
-    # Licence en Génie Industriel
-    "Optimisation de l’implantation d’un atelier industriel",
+    # Licence en Génie Industriel (original)
+    "Optimisation de l'implantation d'un atelier industriel",
     "Analyse des coûts de non-qualité dans une chaîne de production",
     "Amélioration de la gestion des déchets dans un site industriel",
-    "Évaluation de la productivité à l’aide de la méthode OEE",
-    "Mise en place d’un système qualité ISO 9001 dans une PME"
+    "Évaluation de la productivité à l'aide de la méthode OEE",
+    "Mise en place d'un système qualité ISO 9001 dans une PME",
+    
+    # Big Data et Analytics (original)
+    "Implémentation d'un pipeline ETL avec Apache Airflow pour l'analyse de données massives",
+    "Conception d'une architecture lambda pour le traitement temps réel et batch de données",
+    "Utilisation de Spark pour l'analyse prédictive dans un contexte e-commerce",
+    "Mise en place d'un data lake avec technologies Hadoop pour entreprise industrielle",
+    "Développement d'un tableau de bord BI avec visualisation de données massives",
+    
+    # Développement Logiciel (original)
+    "Implémentation d'une PWA (Progressive Web App) pour la gestion de planning",
+    "Développement d'un backend RESTful avec Django pour application de services",
+    "Architecture clean code et patrons de conception dans une application mobile Flutter",
+    "Création d'une application SPA (Single Page Application) avec React et Redux",
+    "Développement d'une API GraphQL pour systèmes distribués",
+    
+    # DevOps et CI/CD (original)
+    "Mise en place d'un pipeline CI/CD avec GitLab pour déploiement continu en production",
+    "Orchestration de conteneurs avec Kubernetes pour une architecture microservices",
+    "Infrastructure as Code (IaC) avec Terraform et Ansible pour environnements hybrides",
+    "Monitoring et observabilité d'applications cloud-native avec Prometheus et Grafana",
+    "Implémentation de méthodes GitOps pour automatisation de déploiements sécurisés",
+    
+    # Blockchain et Technologies Distribuées (nouveau)
+    "Développement d'une application de traçabilité sur blockchain Hyperledger Fabric",
+    "Implémentation d'un contrat intelligent sur Ethereum pour la certification de documents",
+    "Étude comparative des algorithmes de consensus pour blockchains publiques",
+    "Conception d'un système de vote électronique basé sur la blockchain",
+    "Développement d'une solution DeFi (Finance Décentralisée) avec smart contracts",
+    
+    # Cybersécurité Offensive et Défensive (nouveau)
+    "Analyse forensique d'un système Linux compromis",
+    "Développement d'un honeypot intelligent pour collecter des données sur les attaquants",
+    "Conception d'un système de détection d'anomalies basé sur l'apprentissage automatique",
+    "Audit de sécurité d'une application web avec outils OWASP",
+    "Implementation d'un SOC (Security Operations Center) pour PME",
+    
+    # Systèmes Embarqués et IoT (nouveau)
+    "Conception d'un système de surveillance de la qualité de l'air avec capteurs connectés",
+    "Développement d'une plateforme IoT pour l'agriculture intelligente",
+    "Implémentation d'un réseau LoRaWAN pour applications Smart City",
+    "Conception d'un système embarqué low-power pour applications portables",
+    "Sécurisation d'un réseau de capteurs IoT avec chiffrement léger",
+    
+    # Cloud Computing et Virtualisation (nouveau)
+    "Migration d'une infrastructure on-premise vers un cloud hybride",
+    "Optimisation des coûts d'une infrastructure AWS avec serverless computing",
+    "Implémentation d'une solution PaaS avec Kubernetes et Docker",
+    "Conception d'une architecture multi-cloud hautement disponible",
+    "Virtualisation de postes de travail VDI pour environnement d'entreprise",
+    
+    # Réalité Virtuelle et Augmentée (nouveau)
+    "Développement d'une application de formation en réalité virtuelle pour l'industrie",
+    "Conception d'un système de réalité augmentée pour maintenance industrielle",
+    "Création d'une expérience immersive pour visites virtuelles",
+    "Développement d'une solution de télé-maintenance avec réalité augmentée",
+    "Implémentation d'une application médicale utilisant la réalité mixte",
+    
+    # Intelligence Artificielle et Data Science (nouveau)
+    "Développement d'un système de recommandation personnalisé avec apprentissage profond",
+    "Implémentation d'un algorithme de NLP pour l'analyse de sentiment sur réseaux sociaux",
+    "Conception d'un système de détection de fraude par analyse comportementale",
+    "Développement d'un modèle prédictif pour la maintenance industrielle",
+    "Création d'un assistant virtuel pour service client avec traitement du langage naturel",
+    
+    # Robotique Avancée (nouveau)
+    "Développement d'un système de navigation autonome pour robot mobile",
+    "Conception d'un bras robotique collaboratif pour environnement industriel",
+    "Implémentation d'un algorithme SLAM pour cartographie de terrain inconnu",
+    "Développement d'un système de manipulation d'objets par vision artificielle",
+    "Création d'un essaim de robots coordonnés pour tâches complexes",
+    
+    # Biotechnologie et Ingénierie Biomédicale (nouveau)
+    "Conception d'un dispositif de surveillance des signes vitaux connecté",
+    "Développement d'un système d'analyse d'images médicales par IA",
+    "Implémentation d'un algorithme de traitement de signal pour dispositif d'aide auditive",
+    "Conception d'une prothèse intelligente avec capteurs embarqués",
+    "Développement d'un système de télémédecine pour zones rurales",
+    
+    # Gestion de Projets Technologiques (nouveau)
+    "Implémentation d'une méthodologie Agile adaptée pour projets multidisciplinaires",
+    "Développement d'un tableau de bord pour suivi de projets technologiques complexes",
+    "Étude d'impact de la méthodologie DevOps sur la gestion de projets logiciels",
+    "Conception d'un système de gestion des connaissances pour équipes techniques",
+    "Optimisation des processus de prise de décision dans les projets innovants",
+    
+    # Design de l'Expérience Utilisateur (UX/UI) (nouveau)
+    "Conception d'une interface utilisateur adaptative pour applications industrielles",
+    "Développement d'un design system complet pour suite logicielle d'entreprise",
+    "Étude et optimisation de l'expérience utilisateur d'une plateforme e-learning",
+    "Conception d'interfaces accessibles pour utilisateurs à capacités réduites",
+    "Développement d'un prototype d'interface conversationnelle (chatbot) avec UX optimisée"
 ]
 
     

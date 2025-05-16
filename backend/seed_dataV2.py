@@ -23,10 +23,26 @@ def get_image_name(nom_filiere: str) -> str:
         "Management de la Supply Chain": "management-supply-chain.jpg",
         "Génie Mécanique et Aéronautique": "genie-mecanique-aeronautique.jpg",
         "Génie Électrique et Énergies Renouvelables": "genie-electrique-energies.jpg",
-        "Licence en Génie Industriel": "licence-genie-industriel.jpg"
+        "Licence en Génie Industriel": "licence-genie-industriel.jpg",
+         # Nouvelles catégories
+        "Big Data et Analytics": "big-data-analytics.jpg",
+        "Développement Logiciel": "developpement-logiciel.jpg",
+        "DevOps et CI/CD": "devops-cicd.jpg",
+        "Blockchain et Technologies Distribuées": "blockchain-technologies.jpg",
+        "Cybersécurité Offensive et Défensive": "cybersecurite.jpg",
+        "Systèmes Embarqués et IoT": "systemes-embarques-iot.jpg",
+        "Cloud Computing et Virtualisation": "cloud-computing.jpg",
+        "Réalité Virtuelle et Augmentée": "realite-virtuelle-augmentee.jpg",
+        "Intelligence Artificielle et Data Science": "ia-data-science.jpg",
+        "Robotique Avancée": "robotique-avancee.jpg",
+        "Biotechnologie et Ingénierie Biomédicale": "biotechnologie-biomedicale.jpg",
+        "Gestion de Projets Technologiques": "gestion-projets-tech.jpg",
+        "Design de l'Expérience Utilisateur (UX/UI)": "ux-ui-design.jpg"
+        
+        
     }
     
-    return mapping.get(f"/media/{nom_filiere}", "/media/default.jpg")
+    return f"""/media/{mapping.get(nom_filiere, "default.jpg")}""" 
 
 def load_articles_from_json(directory):
     articles = []
