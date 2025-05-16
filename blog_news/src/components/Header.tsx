@@ -62,7 +62,7 @@ const Header = () => {
     {user ? (
       <div className="flex items-center gap-3">
         <span className="text-[#063267]">
-          bienvenue {user.username}
+          bienvenue {user.fullName}
         </span>
         <button 
           onClick={handleLogout}

@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 interface User {
   id: string;
   username: string;
+  fullName: string;
   email?: string;
 }
 

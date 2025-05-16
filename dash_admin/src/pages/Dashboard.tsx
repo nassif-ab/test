@@ -27,7 +27,7 @@ const Dashboard: React.FC = () => {
         
         // Obtener usuarios
         const usersData = await getUsers(token);
-        setUsers(usersData.slice(0, 5)); // Solo los 5 más recientes
+        setUsers(usersData); // Solo los 5 más recientes
         
         setLoading(false);
       } catch (err) {
@@ -156,7 +156,7 @@ const Dashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
+              {users.slice(0, 5).map((user) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {user.username}

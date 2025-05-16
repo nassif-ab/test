@@ -7,6 +7,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = get_password_hash(user.password)
     new_user = models.User(
         username=user.username,
+        fullName=user.fullName,
         email=user.email,
         password=hashed_password,  # كلمة المرور مشفرة الآن
         is_admin=user.is_admin  # Asignar el valor de is_admin del esquema
@@ -18,6 +19,12 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 def get_users(db: Session):
     return db.query(models.User).all()
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
+
+def get_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email == email).first()
 
 # ====== POSTS ======
 def create_post(db: Session, post: schemas.PostCreate, user_id: int):

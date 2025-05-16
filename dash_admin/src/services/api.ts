@@ -4,6 +4,7 @@ import axiosClient from "./axiosclient";
 export interface User {
   id: string;
   username: string;
+  fullName: string;
   email?: string;
   created_at?: string;
   is_admin?: boolean;
@@ -39,6 +40,7 @@ interface AuthResponse {
   token_type: string;
   user_id: string;
   username: string;
+  fullName: string;
   is_admin: boolean;
   user?: User;
 }
@@ -74,6 +76,7 @@ export const loginUser = async (username: string, password: string): Promise<Aut
     const user: User = {
       id: response.data.user_id.toString(),
       username: response.data.username,
+      fullName: response.data.fullName,
       is_admin: response.data.is_admin
     };
 

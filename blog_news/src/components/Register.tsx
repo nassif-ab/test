@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
 interface RegisterProps {
-  onRegister: (username: string, email: string, password: string) => void;
+  onRegister: (username: string, fullName: string, email: string, password: string) => void;
   onSwitchToLogin: () => void;
 }
 
 const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
   const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,7 +34,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
       return;
     }
     
-    onRegister(username, email, password);
+    onRegister(username, fullName, email, password);
   };
 
   return (
@@ -41,14 +42,14 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
       <h2 className="text-2xl font-bold text-center text-[#063267] mb-6">Créer un compte</h2>
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 ">
           {error}
         </div>
       )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 text-right">
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 ">
             Nom d'utilisateur
           </label>
           <input
@@ -62,7 +63,21 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
         </div>
         
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 text-right">
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 ">
+            Nom complet
+          </label>
+          <input
+            type="text"
+            id="fullName"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#063267] focus:border-[#063267]"
+            
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 ">
             Email
           </label>
           <input
@@ -76,7 +91,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
         </div>
         
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 text-right">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 ">
             Mot de passe
           </label>
           <input
@@ -90,7 +105,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
         </div>
         
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 text-right">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 ">
             Confirmer le mot de passe
           </label>
           <input

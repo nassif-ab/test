@@ -49,6 +49,7 @@ def get_admin_id_or_create(db: Session):
         # Crear usuario admin si no existe
         user_data = UserCreate(
             username="admin",
+            fullName="admin",
             email="admin@example.com",
             password="123456789",
             is_admin=True

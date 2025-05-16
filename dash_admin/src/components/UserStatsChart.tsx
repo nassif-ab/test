@@ -58,6 +58,7 @@ const borderColors = [
 interface UserStats {
   user_id: string;
   username: string;
+  fullName: string;
   total_posts: number;
   total_likes: number;
   total_visits: number;

@@ -5,6 +5,7 @@ from typing import Optional
 # ====== User ======
 class UserBase(BaseModel):
     username: str
+    fullName: str
     email: EmailStr
     is_admin: bool = False
 

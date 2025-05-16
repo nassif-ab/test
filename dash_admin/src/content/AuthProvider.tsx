@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 interface User {
   id: string;
   username: string;
+  fullName: string;
   email?: string;
   is_admin?: boolean;
 }
@@ -89,6 +90,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const user: User = {
           id: authResponse.user_id.toString(),
           username: authResponse.username,
+          fullName: authResponse.fullName,
           is_admin: authResponse.is_admin
         };
         setUser(user);

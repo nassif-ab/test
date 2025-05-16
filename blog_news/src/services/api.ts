@@ -4,6 +4,7 @@ import axiosClient from "./axiosclient";
 interface User {
   id: string;
   username: string;
+  fullName: string;
   email?: string;
 }
 
@@ -99,11 +100,12 @@ export const loginUser = async (username: string, password: string): Promise<Aut
 };
 
 
-export const registerUser = async (username: string, email: string, password: string): Promise<User> => {
+export const registerUser = async (username: string, fullName: string, email: string, password: string): Promise<User> => {
   try {
     // استخدام نقطة نهاية التسجيل الجديدة
     const response = await axiosClient.post("/auth/register", {
       username,
+      fullName,
       email,
       password,
     });

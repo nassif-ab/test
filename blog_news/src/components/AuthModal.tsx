@@ -32,12 +32,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleRegister = async (username: string, email: string, password: string) => {
+  const handleRegister = async (username: string, fullName: string, email: string, password: string) => {
     setLoading(true);
     try {
       // إنشاء حساب جديد
       console.log('Attempting to register new user:', username);
-      await registerUser(username, email, password);
+      await registerUser(username, fullName, email, password);
       console.log('Registration successful, attempting to login');
       
       // تسجيل الدخول تلقائيًا بعد التسجيل الناجح

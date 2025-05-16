@@ -7,6 +7,7 @@ import axiosClient from '../services/axiosclient';
 interface User {
   id: string;
   username: string;
+  fullName: string;
   email: string;
 }
 
@@ -102,7 +103,7 @@ const Stats: React.FC = () => {
             >
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.username}
+                  {user.username} | {user.fullName}
                 </option>
               ))}
             </select>
