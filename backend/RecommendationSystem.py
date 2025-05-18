@@ -30,8 +30,8 @@ class RecommendationSystem:
         self.last_cache_update = datetime.datetime.now()
         
         # Tiempo de expiración del caché (12 horas)
-        #########self.cache_expiry = datetime.timedelta(hours=12)
-        self.cache_expiry = datetime.timedelta(minutes=10)
+        self.cache_expiry = datetime.timedelta(hours=12)
+        #########self.cache_expiry = datetime.timedelta(minutes=10)
         
     def _is_cache_valid(self):
         """Verifica si el caché es válido o ha expirado"""
