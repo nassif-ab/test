@@ -24,7 +24,9 @@ def test_recommendations():
     # Obtener todos los usuarios
     users = db.query(User).all()
     
-    # Invalidar caché para asegurar recomendaciones actualizadas
+    # Forzar el entrenamiento ignorando el tiempo del caché
+    recommendation_system.cache_expiry = timedelta(minutes=0)
+    recommendation_system.last_cache_update = datetime.min
     recommendation_system.invalidate_cache()
     
     # Probar recomendaciones para cada usuario

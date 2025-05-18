@@ -30,8 +30,8 @@ class RecommendationSystem:
         self.last_cache_update = datetime.datetime.now()
         
         # Tiempo de expiración del caché (12 horas)
-        self.cache_expiry = datetime.timedelta(hours=12)
-        #########self.cache_expiry = datetime.timedelta(minutes=10)
+        #########self.cache_expiry = datetime.timedelta(hours=12)
+        self.cache_expiry = datetime.timedelta(minutes=10)
         
     def _is_cache_valid(self):
         """Verifica si el caché es válido o ha expirado"""
@@ -115,120 +115,124 @@ class RecommendationSystem:
         Returns:
             List[Dict]: Lista de posts recomendados
         """
-        # Verificar si hay recomendaciones en caché
-        if self._is_cache_valid() and user_id in self.user_based_recommendations_cache:
-            return self.user_based_recommendations_cache[user_id][:n_recommendations]
-        
         try:
-            # Obtener las categorías preferidas del usuario basadas en sus interacciones
-            user_likes = self.db.query(Like).filter(Like.user_id == user_id).all()
-            user_visits = self.db.query(Visit).filter(Visit.user_id == user_id).all()
-            
-            interacted_post_ids = set([like.post_id for like in user_likes] + 
-                                    [visit.post_id for visit in user_visits])
-            
-            # Si el usuario no ha interactuado con ningún post, devolver los posts populares
-            if not interacted_post_ids:
-                logger.info(f"Usuario {user_id} no tiene interacciones, devolviendo posts populares")
-                return self._get_popular_posts(n_recommendations)
-            
-            # Obtener las categorías de los posts con los que ha interactuado el usuario
-            interacted_posts = self.db.query(Post).filter(Post.id.in_(interacted_post_ids)).all()
-            
-            # Contar las interacciones por categoría
-            category_weights = defaultdict(int)
-            for post in interacted_posts:
-                # Dar más peso a los likes (x3) que a las visitas (x1)
-                like_weight = 3 if post.id in [like.post_id for like in user_likes] else 0
-                visit_weight = 1 if post.id in [visit.post_id for visit in user_visits] else 0
-                # like_weight = 3 if post.id in [like.post_id for like in user_likes] else 0
-                # visit_weight = 1 if post.id in [visit.post_id for visit in user_visits] else 0
-                category_weights[post.categorie] += (like_weight + visit_weight)
-            
-            # Ordenar categorías por peso
-            sorted_categories = sorted(category_weights.items(), key=lambda x: x[1], reverse=True)
-            logger.info(f"Categorías preferidas del usuario {user_id}: {sorted_categories}")
-            
-            # Si hay categorías preferidas, priorizar posts de esas categorías
-            if sorted_categories:
-                # Obtener posts no interactuados de las categorías preferidas
-                preferred_categories = [cat for cat, _ in sorted_categories]
+            with self.db.begin():  # Iniciar transacción
+                # Verificar si hay recomendaciones en caché
+                if self._is_cache_valid() and user_id in self.user_based_recommendations_cache:
+                    return self.user_based_recommendations_cache[user_id][:n_recommendations]
                 
-                # Construir matriz usuario-item solo si es necesario para SVD
-                matrix, user_ids, post_ids = self._build_user_item_matrix()
+                # Obtener las categorías preferidas del usuario basadas en sus interacciones
+                user_likes = self.db.query(Like).filter(Like.user_id == user_id).all()
+                user_visits = self.db.query(Visit).filter(Visit.user_id == user_id).all()
                 
-                if user_id in user_ids:
-                    # Aplicar SVD para obtener recomendaciones personalizadas
-                    reconstructed_matrix = self._apply_svd(matrix)
-                    user_idx = user_ids.index(user_id)
-                    user_scores = reconstructed_matrix[user_idx]
+                interacted_post_ids = set([like.post_id for like in user_likes] + 
+                                        [visit.post_id for visit in user_visits])
+                
+                # Si el usuario no ha interactuado con ningún post, devolver los posts populares
+                if not interacted_post_ids:
+                    logger.info(f"Usuario {user_id} no tiene interacciones, devolviendo posts populares")
+                    return self._get_popular_posts(n_recommendations)
+                
+                # Obtener las categorías de los posts con los que ha interactuado el usuario
+                interacted_posts = self.db.query(Post).filter(Post.id.in_(interacted_post_ids)).all()
+                
+                # Contar las interacciones por categoría
+                category_weights = defaultdict(int)
+                for post in interacted_posts:
+                    # Dar más peso a los likes (x3) que a las visitas (x1)
+                    like_weight = 3 if post.id in [like.post_id for like in user_likes] else 0
+                    visit_weight = 1 if post.id in [visit.post_id for visit in user_visits] else 0
+                    # like_weight = 3 if post.id in [like.post_id for like in user_likes] else 0
+                    # visit_weight = 1 if post.id in [visit.post_id for visit in user_visits] else 0
+                    category_weights[post.categorie] += (like_weight + visit_weight)
+                
+                # Ordenar categorías por peso
+                sorted_categories = sorted(category_weights.items(), key=lambda x: x[1], reverse=True)
+                logger.info(f"Categorías preferidas del usuario {user_id}: {sorted_categories}")
+                
+                # Si hay categorías preferidas, priorizar posts de esas categorías
+                if sorted_categories:
+                    # Obtener posts no interactuados de las categorías preferidas
+                    preferred_categories = [cat for cat, _ in sorted_categories]
                     
-                    # Obtener todos los posts no interactuados
-                    all_posts = self.db.query(Post).filter(~Post.id.in_(interacted_post_ids)).all()
+                    # Construir matriz usuario-item solo si es necesario para SVD
+                    matrix, user_ids, post_ids = self._build_user_item_matrix()
                     
-                    # Calcular puntuación combinada (SVD + categoría)
-                    post_scores = []
-                    for post in all_posts:
-                        if post.id in post_ids:
-                            post_idx = post_ids.index(post.id)
-                            svd_score = user_scores[post_idx]
+                    if user_id in user_ids:
+                        # Aplicar SVD para obtener recomendaciones personalizadas
+                        reconstructed_matrix = self._apply_svd(matrix)
+                        user_idx = user_ids.index(user_id)
+                        user_scores = reconstructed_matrix[user_idx]
+                        
+                        # Obtener todos los posts no interactuados
+                        all_posts = self.db.query(Post).filter(~Post.id.in_(interacted_post_ids)).all()
+                        
+                        # Calcular puntuación combinada (SVD + categoría)
+                        post_scores = []
+                        for post in all_posts:
+                            if post.id in post_ids:
+                                post_idx = post_ids.index(post.id)
+                                svd_score = user_scores[post_idx]
+                                
+                                # Bonus por categoría preferida
+                                category_bonus = 0
+                                for i, (cat, _) in enumerate(sorted_categories):
+                                    if post.categorie == cat:
+                                        # Dar más peso a las categorías más preferidas
+                                        category_bonus = (len(sorted_categories) - i) / len(sorted_categories) * 5
+                                        break
+                                
+                                # Puntuación combinada
+                                combined_score = svd_score + category_bonus
+                                post_scores.append((post, combined_score))
+                        
+                        # Ordenar por puntuación combinada
+                        post_scores.sort(key=lambda x: x[1], reverse=True)
+                        recommended_posts = [ps[0] for ps in post_scores[:n_recommendations]]
+                    else:
+                        # Si el usuario no está en la matriz, recomendar por categoría
+                        recommended_posts = []
+                        remaining = n_recommendations
+                        
+                        # Distribuir recomendaciones entre categorías preferidas
+                        for category, _ in sorted_categories:
+                            if remaining <= 0:
+                                break
                             
-                            # Bonus por categoría preferida
-                            category_bonus = 0
-                            for i, (cat, _) in enumerate(sorted_categories):
-                                if post.categorie == cat:
-                                    # Dar más peso a las categorías más preferidas
-                                    category_bonus = (len(sorted_categories) - i) / len(sorted_categories) * 5
-                                    break
+                            # Obtener posts no interactuados de esta categoría
+                            category_posts = self.db.query(Post).filter(
+                                Post.categorie == category,
+                                ~Post.id.in_(interacted_post_ids)
+                            ).order_by(Post.created_at.desc()).limit(remaining).all()
                             
-                            # Puntuación combinada
-                            combined_score = svd_score + category_bonus
-                            post_scores.append((post, combined_score))
-                    
-                    # Ordenar por puntuación combinada
-                    post_scores.sort(key=lambda x: x[1], reverse=True)
-                    recommended_posts = [ps[0] for ps in post_scores[:n_recommendations]]
+                            recommended_posts.extend(category_posts)
+                            remaining -= len(category_posts)
+                        
+                        # Si aún faltan recomendaciones, añadir posts populares
+                        if remaining > 0:
+                            popular_posts = self.db.query(Post).filter(
+                                ~Post.id.in_(interacted_post_ids),
+                                ~Post.id.in_([p.id for p in recommended_posts])
+                            ).order_by(Post.created_at.desc()).limit(remaining).all()
+                            
+                            recommended_posts.extend(popular_posts)
                 else:
-                    # Si el usuario no está en la matriz, recomendar por categoría
-                    recommended_posts = []
-                    remaining = n_recommendations
-                    
-                    # Distribuir recomendaciones entre categorías preferidas
-                    for category, _ in sorted_categories:
-                        if remaining <= 0:
-                            break
-                        
-                        # Obtener posts no interactuados de esta categoría
-                        category_posts = self.db.query(Post).filter(
-                            Post.categorie == category,
-                            ~Post.id.in_(interacted_post_ids)
-                        ).order_by(Post.created_at.desc()).limit(remaining).all()
-                        
-                        recommended_posts.extend(category_posts)
-                        remaining -= len(category_posts)
-                    
-                    # Si aún faltan recomendaciones, añadir posts populares
-                    if remaining > 0:
-                        popular_posts = self.db.query(Post).filter(
-                            ~Post.id.in_(interacted_post_ids),
-                            ~Post.id.in_([p.id for p in recommended_posts])
-                        ).order_by(Post.created_at.desc()).limit(remaining).all()
-                        
-                        recommended_posts.extend(popular_posts)
-            else:
-                # Fallback a posts populares si no hay categorías preferidas
-                return self._get_popular_posts(n_recommendations)
-            
-            # Convertir a formato de respuesta
-            recommendations = [self._post_to_dict(post) for post in recommended_posts]
-            
-            # Guardar en caché
-            self.user_based_recommendations_cache[user_id] = recommendations
-            self.last_cache_update = datetime.datetime.now()
-            
-            return recommendations
+                    # Fallback a posts populares si no hay categorías preferidas
+                    return self._get_popular_posts(n_recommendations)
+                
+                # Convertir a formato de respuesta
+                recommendations = [self._post_to_dict(post) for post in recommended_posts]
+                
+                # Guardar en caché
+                self.user_based_recommendations_cache[user_id] = recommendations
+                self.last_cache_update = datetime.datetime.now()
+                
+                return recommendations
         except Exception as e:
             logger.error(f"Error al obtener recomendaciones para el usuario {user_id}: {e}")
+            # Crear una nueva sesión limpia en caso de error
+            self.db.close()
+            self.db = SessionLocal()
             # Fallback a posts populares en caso de error
             return self._get_popular_posts(n_recommendations)
     
@@ -244,198 +248,193 @@ class RecommendationSystem:
         Returns:
             List[Dict]: Lista de posts similares
         """
-        # Verificar si hay recomendaciones en caché
-        if self._is_cache_valid() and post_id in self.similar_posts_cache:
-            return self.similar_posts_cache[post_id][:n_recommendations]
-        
         try:
-            # Obtener el post objetivo
-            target_post = self.db.query(Post).filter(Post.id == post_id).first()
-            if not target_post:
-                return []
-            
-            # Obtener todos los posts excepto el actual
-            all_posts = self.db.query(Post).filter(Post.id != post_id).all()
-            if not all_posts:
-                return []
-            
-            # Enfoque 1: Construir matriz de interacciones para SVD
-            # Obtener todas las interacciones (likes y visitas) para todos los posts
-            likes_data = self.db.query(Like.post_id, Like.user_id).all()
-            visits_data = self.db.query(Visit.post_id, Visit.user_id).filter(Visit.user_id != None).all()
-            
-            # Crear un DataFrame de interacciones
-            likes_df = pd.DataFrame(likes_data, columns=['post_id', 'user_id'])
-            likes_df['interaction'] = 2  # Mayor peso para likes
-            
-            visits_df = pd.DataFrame(visits_data, columns=['post_id', 'user_id'])
-            visits_df['interaction'] = 1  # Menor peso para visitas
-            
-            # Combinar interacciones
-            interactions_df = pd.concat([likes_df, visits_df])
-            
-            # Si hay suficientes interacciones, usar SVD
-            if len(interactions_df) > 10:  # Umbral arbitrario para tener suficientes datos
-                try:
-                    # Crear matriz de interacciones (usuarios x posts)
-                    interaction_matrix = interactions_df.pivot_table(
-                        index='user_id', 
-                        columns='post_id', 
-                        values='interaction',
-                        aggfunc='sum',
-                        fill_value=0
+            with self.db.begin():  # Iniciar transacción
+                # Verificar si hay recomendaciones en caché
+                if self._is_cache_valid() and post_id in self.similar_posts_cache:
+                    return self.similar_posts_cache[post_id][:n_recommendations]
+                
+                # Obtener el post objetivo
+                target_post = self.db.query(Post).filter(Post.id == post_id).first()
+                if not target_post:
+                    return []
+                
+                # Obtener todos los posts excepto el actual
+                all_posts = self.db.query(Post).filter(Post.id != post_id).all()
+                if not all_posts:
+                    return []
+                
+                # Enfoque 1: Construir matriz de interacciones para SVD
+                # Obtener todas las interacciones (likes y visitas) para todos los posts
+                likes_data = self.db.query(Like.post_id, Like.user_id).all()
+                visits_data = self.db.query(Visit.post_id, Visit.user_id).filter(Visit.user_id != None).all()
+                
+                # Crear un DataFrame de interacciones
+                likes_df = pd.DataFrame(likes_data, columns=['post_id', 'user_id'])
+                likes_df['interaction'] = 2  # Mayor peso para likes
+                
+                visits_df = pd.DataFrame(visits_data, columns=['post_id', 'user_id'])
+                visits_df['interaction'] = 1  # Menor peso para visitas
+                
+                # Combinar interacciones
+                interactions_df = pd.concat([likes_df, visits_df])
+                
+                # Si hay suficientes interacciones, usar SVD
+                if len(interactions_df) > 10:  # Umbral arbitrario para tener suficientes datos
+                    try:
+                        # Crear matriz de interacciones (usuarios x posts)
+                        interaction_matrix = interactions_df.pivot_table(
+                            index='user_id', 
+                            columns='post_id', 
+                            values='interaction',
+                            aggfunc='sum',
+                            fill_value=0
+                        )
+                        
+                        # Aplicar SVD si la matriz es lo suficientemente grande
+                        if interaction_matrix.shape[0] > 1 and interaction_matrix.shape[1] > 1:
+                            # Obtener usuarios que han interactuado con el post objetivo
+                            target_post_users = interactions_df[interactions_df['post_id'] == post_id]['user_id'].unique()
+                            
+                            # Si hay usuarios que han interactuado con este post
+                            if len(target_post_users) > 0:
+                                # Encontrar posts con los que estos usuarios también han interactuado
+                                similar_posts_ids = interactions_df[
+                                    (interactions_df['user_id'].isin(target_post_users)) & 
+                                    (interactions_df['post_id'] != post_id)
+                                ]['post_id'].value_counts().index.tolist()
+                                
+                                # Limitar a los top n posts
+                                similar_posts_ids = similar_posts_ids[:n_recommendations]
+                                
+                                if len(similar_posts_ids) >= n_recommendations:
+                                    # Obtener detalles de los posts
+                                    similar_posts = []
+                                    for similar_id in similar_posts_ids:
+                                        similar_post = self.db.query(Post).filter(Post.id == similar_id).first()
+                                        if similar_post:
+                                            similar_posts.append(self._post_to_dict(similar_post))
+                                    
+                                    # Guardar en caché
+                                    self.similar_posts_cache[post_id] = similar_posts
+                                    self.last_cache_update = datetime.datetime.now()
+                                    
+                                    return similar_posts[:n_recommendations]
+                    except Exception as matrix_error:
+                        logger.warning(f"Error al aplicar SVD para posts similares: {matrix_error}")
+                
+                # Enfoque 2: Similitud basada en características y contenido
+                # Crear DataFrame con características de los posts
+                posts_features = []
+                for p in [target_post] + all_posts:
+                    # Extraer características del post
+                    features = {
+                        'id': p.id,
+                        'categorie': p.categorie or "unknown",
+                        # Añadir más características para mejorar la similitud
+                        'title_length': len(p.title) if p.title else 0,
+                        'content_length': len(p.content) if p.content else 0,
+                    }
+                    posts_features.append(features)
+                
+                # Convertir a DataFrame
+                posts_df = pd.DataFrame(posts_features)
+                
+                # One-hot encoding de categorías
+                if 'categorie' in posts_df.columns:
+                    categories_dummies = pd.get_dummies(posts_df['categorie'])
+                    # Combinar con otras características numéricas
+                    numeric_features = posts_df[['title_length', 'content_length']]
+                    # Normalizar características numéricas
+                    from sklearn.preprocessing import MinMaxScaler
+                    scaler = MinMaxScaler()
+                    numeric_features_scaled = scaler.fit_transform(numeric_features)
+                    numeric_features_df = pd.DataFrame(
+                        numeric_features_scaled, 
+                        columns=['title_length_scaled', 'content_length_scaled'],
+                        index=posts_df.index
                     )
                     
-                    # Aplicar SVD si la matriz es lo suficientemente grande
-                    if interaction_matrix.shape[0] > 1 and interaction_matrix.shape[1] > 1:
-                        # Obtener usuarios que han interactuado con el post objetivo
-                        target_post_users = interactions_df[interactions_df['post_id'] == post_id]['user_id'].unique()
-                        
-                        # Si hay usuarios que han interactuado con este post
-                        if len(target_post_users) > 0:
-                            # Encontrar posts con los que estos usuarios también han interactuado
-                            similar_posts_ids = interactions_df[
-                                (interactions_df['user_id'].isin(target_post_users)) & 
-                                (interactions_df['post_id'] != post_id)
-                            ]['post_id'].value_counts().index.tolist()
-                            
-                            # Limitar a los top n posts
-                            similar_posts_ids = similar_posts_ids[:n_recommendations]
-                            
-                            if len(similar_posts_ids) >= n_recommendations:
-                                # Obtener detalles de los posts
-                                similar_posts = []
-                                for similar_id in similar_posts_ids:
-                                    similar_post = self.db.query(Post).filter(Post.id == similar_id).first()
-                                    if similar_post:
-                                        similar_posts.append(self._post_to_dict(similar_post))
-                                
-                                # Guardar en caché
-                                self.similar_posts_cache[post_id] = similar_posts
-                                self.last_cache_update = datetime.datetime.now()
-                                
-                                return similar_posts[:n_recommendations]
-                except Exception as matrix_error:
-                    logger.warning(f"Error al aplicar SVD para posts similares: {matrix_error}")
+                    # Combinar todas las características
+                    features_matrix = pd.concat([categories_dummies, numeric_features_df], axis=1)
+                    
+                    # Calcular similitud
+                    post_idx = posts_df[posts_df['id'] == post_id].index[0]
+                    post_vector = features_matrix.iloc[post_idx].values.reshape(1, -1)
+                    
+                    similarities = []
+                    for i, p_id in enumerate(posts_df['id']):
+                        if p_id != post_id:
+                            other_vector = features_matrix.iloc[i].values.reshape(1, -1)
+                            sim = cosine_similarity(post_vector, other_vector)[0][0]
+                            similarities.append((p_id, sim))
+                    
+                    # Ordenar por similitud
+                    similarities.sort(key=lambda x: x[1], reverse=True)
+                    
+                    # Obtener los top n posts
+                    similar_post_ids = [s[0] for s in similarities[:n_recommendations]]
+                    
+                    # Obtener detalles de los posts
+                    similar_posts = []
+                    for similar_id in similar_post_ids:
+                        similar_post = self.db.query(Post).filter(Post.id == similar_id).first()
+                        if similar_post:
+                            similar_posts.append(self._post_to_dict(similar_post))
+                    
+                    # Guardar en caché
+                    self.similar_posts_cache[post_id] = similar_posts
+                    self.last_cache_update = datetime.datetime.now()
+                    
+                    return similar_posts
             
-            # Enfoque 2: Similitud basada en características y contenido
-            # Crear DataFrame con características de los posts
-            posts_features = []
-            for p in [target_post] + all_posts:
-                # Extraer características del post
-                features = {
-                    'id': p.id,
-                    'categorie': p.categorie or "unknown",
-                    # Añadir más características para mejorar la similitud
-                    'title_length': len(p.title) if p.title else 0,
-                    'content_length': len(p.content) if p.content else 0,
-                }
-                posts_features.append(features)
+                # Enfoque 3: Fallback a posts de la misma categoría
+                if target_post.categorie:
+                    category_posts = [p for p in all_posts if p.categorie == target_post.categorie]
+                    if category_posts:
+                        # Tomar los primeros n posts de la misma categoría
+                        similar_posts = category_posts[:n_recommendations]
+                        result = [self._post_to_dict(p) for p in similar_posts]
+                        self.similar_posts_cache[post_id] = result
+                        return result
             
-            # Convertir a DataFrame
-            posts_df = pd.DataFrame(posts_features)
-            
-            # One-hot encoding de categorías
-            if 'categorie' in posts_df.columns:
-                categories_dummies = pd.get_dummies(posts_df['categorie'])
-                # Combinar con otras características numéricas
-                numeric_features = posts_df[['title_length', 'content_length']]
-                # Normalizar características numéricas
-                from sklearn.preprocessing import MinMaxScaler
-                scaler = MinMaxScaler()
-                numeric_features_scaled = scaler.fit_transform(numeric_features)
-                numeric_features_df = pd.DataFrame(
-                    numeric_features_scaled, 
-                    columns=['title_length_scaled', 'content_length_scaled'],
-                    index=posts_df.index
-                )
-                
-                # Combinar todas las características
-                features_matrix = pd.concat([categories_dummies, numeric_features_df], axis=1)
-                
-                # Calcular similitud
-                post_idx = posts_df[posts_df['id'] == post_id].index[0]
-                post_vector = features_matrix.iloc[post_idx].values.reshape(1, -1)
-                
-                similarities = []
-                for i, p_id in enumerate(posts_df['id']):
-                    if p_id != post_id:
-                        other_vector = features_matrix.iloc[i].values.reshape(1, -1)
-                        sim = cosine_similarity(post_vector, other_vector)[0][0]
-                        similarities.append((p_id, sim))
-                
-                # Ordenar por similitud
-                similarities.sort(key=lambda x: x[1], reverse=True)
-                
-                # Obtener los top n posts
-                similar_post_ids = [s[0] for s in similarities[:n_recommendations]]
-                
-                # Obtener detalles de los posts
-                similar_posts = []
-                for similar_id in similar_post_ids:
-                    similar_post = self.db.query(Post).filter(Post.id == similar_id).first()
-                    if similar_post:
-                        similar_posts.append(self._post_to_dict(similar_post))
-                
-                # Guardar en caché
-                self.similar_posts_cache[post_id] = similar_posts
-                self.last_cache_update = datetime.datetime.now()
-                
-                return similar_posts
-            
-            # Enfoque 3: Fallback a posts de la misma categoría
-            if target_post.categorie:
-                category_posts = [p for p in all_posts if p.categorie == target_post.categorie]
-                if category_posts:
-                    # Tomar los primeros n posts de la misma categoría
-                    similar_posts = category_posts[:n_recommendations]
-                    result = [self._post_to_dict(p) for p in similar_posts]
-                    self.similar_posts_cache[post_id] = result
-                    return result
-            
-            # Enfoque 4: Último recurso - posts más recientes
-            recent_posts = self.db.query(Post).filter(Post.id != post_id).order_by(Post.created_at.desc()).limit(n_recommendations).all()
-            result = [self._post_to_dict(p) for p in recent_posts]
-            self.similar_posts_cache[post_id] = result
-            return result
+                # Enfoque 4: Último recurso - posts más recientes
+                recent_posts = self.db.query(Post).filter(Post.id != post_id).order_by(Post.created_at.desc()).limit(n_recommendations).all()
+                result = [self._post_to_dict(p) for p in recent_posts]
+                self.similar_posts_cache[post_id] = result
+                return result
             
         except Exception as e:
             logger.error(f"Error al obtener posts similares para el post {post_id}: {e}")
+            self.db.rollback()  # Rechazar transacción en caso de error
             return []
     
     def _get_popular_posts(self, n_posts: int = 5) -> List[Dict]:
-        """
-        Obtiene los posts más populares basados en likes y visitas
-        
-        Args:
-            n_posts (int, optional): Número de posts a retornar. Default es 5.
-            
-        Returns:
-            List[Dict]: Lista de posts populares
-        """
         try:
-            # Obtener posts con conteo de likes y visitas
-            posts_with_stats = self.db.query(
-                Post,
-                func.count(Like.id).label('like_count'),
-                func.count(Visit.id).label('visit_count')
-            ).outerjoin(
-                Like, Post.id == Like.post_id
-            ).outerjoin(
-                Visit, Post.id == Visit.post_id
-            ).group_by(
-                Post.id
-            ).order_by(
-                func.count(Like.id).desc(),
-                func.count(Visit.id).desc()
-            ).limit(n_posts).all()
-            
-            # Convertir a formato de respuesta
-            popular_posts = []
-            for post, _, _ in posts_with_stats:
-                popular_posts.append(self._post_to_dict(post))
-            
-            return popular_posts
+            with self.db.begin():  # Iniciar transacción
+                # Obtener posts con conteo de likes y visitas
+                posts_with_stats = self.db.query(
+                    Post,
+                    func.count(Like.id).label('like_count'),
+                    func.count(Visit.id).label('visit_count')
+                ).outerjoin(
+                    Like, Post.id == Like.post_id
+                ).outerjoin(
+                    Visit, Post.id == Visit.post_id
+                ).group_by(
+                    Post.id
+                ).order_by(
+                    func.count(Like.id).desc(),
+                    func.count(Visit.id).desc()
+                ).limit(n_posts).all()
+                
+                # Convertir a formato de respuesta
+                popular_posts = []
+                for post, _, _ in posts_with_stats:
+                    popular_posts.append(self._post_to_dict(post))
+                
+                return popular_posts
+                
         except Exception as e:
             logger.error(f"Error al obtener posts populares: {e}")
             # Fallback: obtener los posts más recientes
@@ -468,7 +467,7 @@ class RecommendationSystem:
             "visits": self.db.query(models.Visit).filter(models.Visit.post_id == post.id).count(),
             "isliked": post_isliked
         }
-    
+
     def invalidate_cache(self):
         """Invalida el caché de recomendaciones"""
         self.user_based_recommendations_cache = {}
